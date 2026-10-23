@@ -1,0 +1,74 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: #111827;
+}
+.shell-header {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  padding: 12px 24px;
+  background: #111827;
+  color: #f9fafb;
+}
+.shell-header span {
+  font-weight: 600;
+}
+.shell-header nav {
+  display: flex;
+  gap: 16px;
+}
+.shell-header a {
+  color: #d1d5db;
+  text-decoration: none;
+}
+.shell-header a[aria-current="page"] {
+  color: #fff;
+  text-decoration: underline;
+}
+.page {
+  padding: 24px;
+  max-width: 1080px;
+}
+.page > mfe-outlet:not([hidden]) {
+  display: block;
+  max-width: 720px;
+}
+.overview:not([hidden]) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+.overview > mfe-outlet {
+  display: block;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+.status {
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+.status-loading {
+  color: #6b7280;
+}
+.status-error,
+.status-denied,
+[data-testid="not-found"] {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+.shell-header .user {
+  margin-left: auto;
+  font-weight: 400;
+}
+.theme-toggle {
+  font: inherit;
+}
+:root[data-theme="dark"] body {
+  background: #111827;
+  color: #f9fafb;
+}

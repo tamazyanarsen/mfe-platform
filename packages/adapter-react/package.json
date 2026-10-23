@@ -1,0 +1,22 @@
+{
+  "name": "@mfe/adapter-react",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@mfe/contract": "workspace:*",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.2.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}

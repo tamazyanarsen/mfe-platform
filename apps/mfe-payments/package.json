@@ -1,0 +1,23 @@
+{
+  "name": "@mfe-app/payments",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@mfe/adapter-rwc": "workspace:*",
+    "@mfe/bus": "workspace:*",
+    "@mfe/contract": "workspace:*",
+    "@rwcjs/core": "^3.3.1",
+    "@rwcjs/router": "^0.1.1",
+    "@rwcjs/ui": "0.1.0"
+  },
+  "devDependencies": {
+    "@module-federation/rsbuild-plugin": "^2.9.2",
+    "@rsbuild/core": "^2.2.14"
+  }
+}

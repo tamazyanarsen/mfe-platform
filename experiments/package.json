@@ -1,0 +1,9 @@
+{
+  "name": "@mfe-experiments/all",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@rwcjs/core": "^3.3.1"
+  }
+}

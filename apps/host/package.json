@@ -1,0 +1,21 @@
+{
+  "name": "@mfe-app/host",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "devDependencies": {
+    "@module-federation/rsbuild-plugin": "^2.9.2",
+    "@rsbuild/core": "^2.2.14"
+  },
+  "dependencies": {
+    "@mfe/bus": "workspace:*",
+    "@mfe/contract": "workspace:*",
+    "@mfe/host-runtime": "workspace:*",
+    "@mfe/registry": "workspace:*",
+    "@module-federation/enhanced": "2.9.2"
+  }
+}

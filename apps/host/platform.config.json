@@ -1,0 +1,44 @@
+{
+  "remotes": [
+    {
+      "name": "accounts",
+      "entry": "http://localhost:3001/mf-manifest.json"
+    },
+    {
+      "name": "payments",
+      "entry": "http://localhost:3002/mf-manifest.json"
+    },
+    {
+      "name": "legacy",
+      "entry": "http://localhost:3003/mf-manifest.json"
+    }
+  ],
+  "nav": [
+    {
+      "href": "/",
+      "title": "Обзор"
+    },
+    {
+      "href": "/accounts",
+      "title": "Счета"
+    },
+    {
+      "href": "/payments",
+      "title": "Платежи"
+    },
+    {
+      "href": "/legacy",
+      "title": "Отчёты"
+    }
+  ],
+  "overview": [
+    {
+      "remote": "accounts",
+      "basename": "/accounts"
+    },
+    {
+      "remote": "payments",
+      "basename": "/payments"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+[test]
+# bun test работает без DOM. happy-dom регистрируется глобально до загрузки тестов:
+# host-runtime и ремоуты трогают customElements на уровне модулей.
+preload = ["./scripts/test-setup.ts"]

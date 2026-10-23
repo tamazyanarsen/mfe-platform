@@ -1,0 +1,22 @@
+{
+  "name": "@mfe/adapter-rwc",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "@mfe/bus": "workspace:*",
+    "@mfe/registry": "workspace:*"
+  },
+  "peerDependencies": {
+    "@rwcjs/core": "^3.3.0"
+  },
+  "devDependencies": {
+    "@mfe/contract": "workspace:*",
+    "@rwcjs/core": "^3.3.1"
+  }
+}
