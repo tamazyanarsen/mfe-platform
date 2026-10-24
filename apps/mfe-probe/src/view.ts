@@ -1,4 +1,4 @@
-import type { PlatformState } from "@mfe/contract";
+import type { PlatformState } from "@mfe-platform/contract";
 import { configCustomComponent, css, defineComponent, div, h2 } from "@rwcjs/core";
 import { rwcButton } from "@rwcjs/ui";
 import { KIT_VERSION } from "./kit";

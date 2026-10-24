@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import type { PlatformEvent } from "@mfe/contract";
-import type { KitRecord } from "@mfe/registry";
+import type { PlatformEvent } from "@mfe-platform/contract";
+import type { KitRecord } from "@mfe-platform/registry";
 import { createDevtools, type Devtools } from "../src";
 
 const event = (type: PlatformEvent["type"], name: string, extra: Partial<PlatformEvent> = {}) =>

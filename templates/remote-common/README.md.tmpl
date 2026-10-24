@@ -12,7 +12,7 @@ http://localhost:__PORT__.
 
 - `src/manifest.ts` — имя, тег, маршруты; без импортов фреймворка.
 - `src/entry.ts` — `manifest` и идемпотентная `register()`.
-- `test/contract.test.ts` — `checkRemote` из `@mfe/testing`: тот же контракт, что проверяет хост.
+- `test/contract.test.ts` — `checkRemote` из `@mfe-platform/testing`: тот же контракт, что проверяет хост.
 
 Хост узнаёт о ремоуте из `apps/host/public/platform.config.json`; генератор уже добавил туда
 запись и пункт навигации. Контракт — [docs/contract.md](../../docs/contract.md).

@@ -1,4 +1,4 @@
-import type { NavigateDetail, PlatformState } from "@mfe/contract";
+import type { NavigateDetail, PlatformState } from "@mfe-platform/contract";
 import { useState } from "react";
 
 export interface ReportsProps {

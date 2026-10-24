@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { PlatformEvent } from "@mfe/contract";
+import type { PlatformEvent } from "@mfe-platform/contract";
 import { createTagRegistry, getPlatformRegistry, postfixFor } from "../src";
 
 describe("postfixFor", () => {

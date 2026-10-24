@@ -16,17 +16,17 @@ adapters and applications.
 ```mermaid
 flowchart BT
   subgraph core["Core — no UI frameworks"]
-    contract["@mfe/contract<br/><small>types, manifest, navigation,<br/>bus topics, extension points</small>"]
-    runtime["@mfe/host-runtime<br/><small>#lt;mfe-outlet#gt;, MF loader,<br/>router, transports</small>"]
-    registry["@mfe/registry<br/><small>versioned tags</small>"]
-    bus["@mfe/bus<br/><small>bus and store</small>"]
+    contract["@mfe-platform/contract<br/><small>types, manifest, navigation,<br/>bus topics, extension points</small>"]
+    runtime["@mfe-platform/host-runtime<br/><small>#lt;mfe-outlet#gt;, MF loader,<br/>router, transports</small>"]
+    registry["@mfe-platform/registry<br/><small>versioned tags</small>"]
+    bus["@mfe-platform/bus<br/><small>bus and store</small>"]
   end
 
   subgraph adapters["Adapters and tools"]
-    arwc["@mfe/adapter-rwc"]
-    areact["@mfe/adapter-react"]
-    testing["@mfe/testing<br/><small>mountRemote, checkRemote</small>"]
-    devtools["@mfe/devtools<br/><small>debug panel</small>"]
+    arwc["@mfe-platform/adapter-rwc"]
+    areact["@mfe-platform/adapter-react"]
+    testing["@mfe-platform/testing<br/><small>mountRemote, checkRemote</small>"]
+    devtools["@mfe-platform/devtools<br/><small>debug panel</small>"]
   end
 
   subgraph apps["Applications"]
@@ -93,7 +93,7 @@ flowchart LR
       store["Store#lt;PlatformState#gt;<br/><small>session, selected, theme, locale</small>"]
       loader["FederationLoader"]
       tr["Transports<br/><small>console + memory → mfe.events()</small>"]
-      dt["@mfe/devtools<br/><small>Alt+Shift+D</small>"]
+      dt["@mfe-platform/devtools<br/><small>Alt+Shift+D</small>"]
     end
 
     subgraph outlets["#lt;mfe-outlet#gt; × N"]
@@ -311,7 +311,7 @@ fallback instead of a half-working remote.
 
 ## 7. Extension points
 
-The interfaces are declared in `@mfe/contract`. The core ships default implementations; your own
+The interfaces are declared in `@mfe-platform/contract`. The core ships default implementations; your own
 are plugged in through parameters, without a fork.
 
 ```mermaid
@@ -356,7 +356,7 @@ flowchart TB
     a0["bun run create:remote cards<br/>--template vanilla | rwc | react"]
     a1["manifest.ts<br/>name, tag, routes, requires, extra"]
     a2["entry.ts<br/>manifest + idempotent register()"]
-    a3["test/contract.test.ts<br/>checkRemote from @mfe/testing"]
+    a3["test/contract.test.ts<br/>checkRemote from @mfe-platform/testing"]
     a5["development on the staging environment:<br/>?mfe-override=cards=http://localhost:3004/…"]
     a4["deploy → mf-manifest.json at a URL"]
     a0 --> a1 --> a2 --> a3 --> a5 --> a4

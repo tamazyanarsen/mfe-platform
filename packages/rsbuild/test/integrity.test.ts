@@ -3,8 +3,8 @@ import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { computeIntegrity } from "../packages/host-runtime/src";
-import { INTEGRITY_FILE, sealManifest, sri } from "./integrity";
+import { computeIntegrity } from "@mfe-platform/host-runtime";
+import { INTEGRITY_FILE, sealManifest, sri } from "../src/integrity";
 
 let dist = "";
 beforeEach(() => {

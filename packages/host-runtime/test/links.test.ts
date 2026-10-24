@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { CONTRACT_VERSION, type RemoteManifest, type RemoteModule } from "@mfe/contract";
+import { CONTRACT_VERSION, type RemoteManifest, type RemoteModule } from "@mfe-platform/contract";
 import {
   createHostRouter,
   createPrefetcher,

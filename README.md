@@ -94,8 +94,8 @@ packages/
   adapter-react/      кастомный элемент-обёртка для React-компонента
   testing/            mountRemote, checkRemote — тесты ремоута без хоста
   devtools/           панель отладки на странице
+  rsbuild/            сборка ремоута: defineRemoteConfig, общие модули, хеши целостности
 templates/            шаблоны create:remote: vanilla, rwc, react
-config/               сборка ремоута: общие модули, хеши целостности
 e2e/, e2e-prod/       сквозные тесты dev-стенда и production-сборки
 docs/                 архитектура, контракт, разработка, миграция
 ```

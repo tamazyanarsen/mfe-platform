@@ -1,11 +1,11 @@
-import type { RemoteModule } from "@mfe/contract";
+import type { RemoteModule } from "@mfe-platform/contract";
 import { manifest } from "./manifest";
 import { register__CLASS__View } from "./view";
 
 export { manifest };
 
 // Повторный вызов безопасен: rwc не регистрирует тег второй раз.
-// UI-кит регистрируется через useKit из @mfe/adapter-rwc — см. docs/contract.md.
+// UI-кит регистрируется через useKit из @mfe-platform/adapter-rwc — см. docs/contract.md.
 export const register: RemoteModule["register"] = () => {
   register__CLASS__View();
 };

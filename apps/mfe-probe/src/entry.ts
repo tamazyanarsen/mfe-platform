@@ -1,4 +1,4 @@
-import type { RemoteModule } from "@mfe/contract";
+import type { RemoteModule } from "@mfe-platform/contract";
 import { registerKit } from "./kit";
 import { manifest } from "./manifest";
 import { registerProbeView } from "./view";

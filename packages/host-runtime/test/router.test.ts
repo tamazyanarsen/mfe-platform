@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
-import { CONTRACT_VERSION, navigateEvent, type RemoteManifest } from "@mfe/contract";
+import { CONTRACT_VERSION, navigateEvent, type RemoteManifest } from "@mfe-platform/contract";
 import {
   createHostRouter,
   createRouteTable,

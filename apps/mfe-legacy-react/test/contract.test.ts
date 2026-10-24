@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { checkRemote } from "@mfe/testing";
+import { checkRemote } from "@mfe-platform/testing";
 import * as entry from "../src/entry";
 import { manifest } from "../src/manifest";
 

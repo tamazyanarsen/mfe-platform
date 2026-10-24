@@ -11,7 +11,7 @@
 
 ```ts
 // src/manifest.ts — без импортов фреймворка
-import { CONTRACT_VERSION, type RemoteManifest } from "@mfe/contract";
+import { CONTRACT_VERSION, type RemoteManifest } from "@mfe-platform/contract";
 
 export const manifest: RemoteManifest = {
   contractVersion: CONTRACT_VERSION,
@@ -24,7 +24,7 @@ export const manifest: RemoteManifest = {
 
 ```ts
 // src/entry.ts — React
-import { registerReactElement } from "@mfe/adapter-react";
+import { registerReactElement } from "@mfe-platform/adapter-react";
 import { App } from "./App";
 export { manifest } from "./manifest";
 
@@ -45,7 +45,7 @@ exposes: {
 ```
 
 Для ремоута на rwc `register()` вызывает `registerXxx()` из `configCustomComponent`, а кит
-регистрирует через `useKit` из `@mfe/adapter-rwc`.
+регистрирует через `useKit` из `@mfe-platform/adapter-rwc`.
 
 ## 2. Ремоут: роутер относительно `basename`
 
@@ -56,7 +56,7 @@ exposes: {
 ## 3. Хост: заменить ручное монтирование на `<mfe-outlet>`
 
 ```ts
-import { createFederationLoader, createHostRouter, createRouteTable, defineMfeOutlet } from "@mfe/host-runtime";
+import { createFederationLoader, createHostRouter, createRouteTable, defineMfeOutlet } from "@mfe-platform/host-runtime";
 import { loadRemote, registerRemotes } from "@module-federation/enhanced/runtime";
 
 registerRemotes([{ name: "billing", entry: "https://cdn.bank.local/billing/mf-manifest.json" }]);
@@ -81,7 +81,7 @@ createHostRouter({
 читать при запуске — тогда новый адрес не требует пересборки:
 
 ```ts
-import { loadJsonConfig, type RemoteEntry, validateRemoteEntries } from "@mfe/host-runtime";
+import { loadJsonConfig, type RemoteEntry, validateRemoteEntries } from "@mfe-platform/host-runtime";
 
 const remotes = await loadJsonConfig<RemoteEntry[]>("/remotes.json", validateRemoteEntries);
 registerRemotes(remotes);
@@ -105,7 +105,7 @@ Singleton-зависимостей нет: фреймворк делится т�
 Добавьте в CI ремоута тест контракта — он ловит расхождения до того, как их увидит хост:
 
 ```ts
-import { checkRemote } from "@mfe/testing";
+import { checkRemote } from "@mfe-platform/testing";
 import * as entry from "../src/entry";
 import { manifest } from "../src/manifest";
 

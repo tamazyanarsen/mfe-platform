@@ -1,5 +1,5 @@
-import type { ObservabilityTransport, PlatformEvent } from "@mfe/contract";
-import { getPlatformRegistry, type KitRecord } from "@mfe/registry";
+import type { ObservabilityTransport, PlatformEvent } from "@mfe-platform/contract";
+import { getPlatformRegistry, type KitRecord } from "@mfe-platform/registry";
 
 /**
  * Панель отладки платформы прямо на странице: какие ремоуты смонтированы, их версии,

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { PlatformTopics } from "@mfe/contract";
+import type { PlatformTopics } from "@mfe-platform/contract";
 import { createBus, createStore, createSubscriptions } from "../src";
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));

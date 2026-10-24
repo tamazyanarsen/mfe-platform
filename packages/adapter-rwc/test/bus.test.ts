@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createBus } from "@mfe/bus";
-import type { PlatformTopics } from "@mfe/contract";
+import { createBus } from "@mfe-platform/bus";
+import type { PlatformTopics } from "@mfe-platform/contract";
 import { createRoot, defineComponent, span, useCustomComponent } from "@rwcjs/core";
 import { subscribeInRender } from "../src";
 

@@ -17,7 +17,7 @@ bun run dev
 | Parameter | Default | What it does |
 | --- | --- | --- |
 | `<name>` | — | remote name: lowercase letters, digits and `_` (`cards`, `credit_cards`) |
-| `--template` | `vanilla` | `vanilla` — a bare custom element, `rwc` — an rwc component, `react` — React via `@mfe/adapter-react` |
+| `--template` | `vanilla` | `vanilla` — a bare custom element, `rwc` — an rwc component, `react` — React via `@mfe-platform/adapter-react` |
 | `--port` | the next one after those in use | dev server port |
 | `--title` | name in PascalCase | page title and navigation item title |
 | `--no-nav` | — | do not add a navigation item (widget remote) |
@@ -33,13 +33,13 @@ JS identifier: a hyphen is not allowed. The generator builds the element tag wit
 The templates live in `templates/`. `bun run check:templates` generates each one, installs it, runs
 its test and builds it, and then restores the repository to how it was; the same check runs in CI.
 
-## Contract test: `@mfe/testing`
+## Contract test: `@mfe-platform/testing`
 
 A remote is checked the same way the host will check it — without a host, Module Federation, or network:
 
 ```ts
 import { expect, test } from "bun:test";
-import { checkRemote, mountRemote } from "@mfe/testing";
+import { checkRemote, mountRemote } from "@mfe-platform/testing";
 import * as entry from "../src/entry";
 import { manifest } from "../src/manifest";
 
@@ -104,7 +104,7 @@ https://platform.bank.example/?mfe-override=cards=http://localhost:3004/mf-manif
 - The same restrictions apply: local addresses only, the name must be a JS identifier.
 - A host that does not need this turns it off: `applyRemoteOverrides(remotes, { allowNew: false })`.
 
-## Debug panel: `@mfe/devtools`
+## Debug panel: `@mfe-platform/devtools`
 
 The on-page panel shows:
 
@@ -120,7 +120,7 @@ and registry events on the page; there is no network.
 Hooking it up in your own host — as one more observability transport:
 
 ```ts
-import { createDevtools } from "@mfe/devtools";
+import { createDevtools } from "@mfe-platform/devtools";
 
 const devtools = createDevtools({ overrides });
 defineMfeOutlet({ loader, transport: combineTransports(consoleTransport, devtools.transport) });
@@ -143,7 +143,7 @@ without a rebuild.
 }
 ```
 
-The file is validated on load (`validateRemoteEntries` from `@mfe/host-runtime` and the host's
+The file is validated on load (`validateRemoteEntries` from `@mfe-platform/host-runtime` and the host's
 own check): on an error the host shows a message instead of a blank page, and the console lists all
 problems at once. A remote manifest that fails `validateManifest` does not get into the route table;
 the other remotes keep working.
@@ -174,7 +174,7 @@ from its configuration to every chunk.
      "integrity": "sha384-…" }
    ```
 
-3. The host (`createIntegrityPlugin` from `@mfe/host-runtime`) checks the manifest against this hash and
+3. The host (`createIntegrityPlugin` from `@mfe-platform/host-runtime`) checks the manifest against this hash and
    sets `integrity` and `crossorigin="anonymous"` on remoteEntry and every chunk. A file from the URL
    of a checked remote that is not in the hash table is blocked. A violation is an
    `integrity:denied` event in the transport and in the debug panel.
@@ -197,7 +197,7 @@ remoteEntry and chunk.
 A remote requests a change to shared state with an event from its own element:
 
 ```ts
-import { patchEvent } from "@mfe/contract";
+import { patchEvent } from "@mfe-platform/contract";
 
 this.dispatchEvent(patchEvent({ theme: "dark" }));
 ```
@@ -229,7 +229,7 @@ A remote over budget fails CI. The `create:remote` templates come with a budget,
 
 ## Shared modules
 
-`defineRemoteConfig` (config/rsbuild-remote.ts) decides what a remote shares with others:
+`defineRemoteConfig` from `@mfe-platform/rsbuild` decides what a remote shares with others:
 
 | Option | Default | What it does |
 | --- | --- | --- |

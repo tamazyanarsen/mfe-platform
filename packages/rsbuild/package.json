@@ -1,0 +1,21 @@
+{
+  "name": "@mfe-platform/rsbuild",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": "./src/index.ts",
+    "./env": {
+      "types": "./env.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "@mfe-platform/host-runtime": "workspace:*"
+  },
+  "peerDependencies": {
+    "@module-federation/rsbuild-plugin": "^2.9.0",
+    "@rsbuild/core": "^2.2.0"
+  }
+}

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
-import { type PlatformEvent, type PlatformState, patchEvent } from "@mfe/contract";
+import { type PlatformEvent, type PlatformState, patchEvent } from "@mfe-platform/contract";
 import {
   DEFAULT_STORE_ACCESS,
   filterPatch,

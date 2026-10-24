@@ -94,8 +94,8 @@ packages/
   adapter-react/      wrapper custom element for a React component
   testing/            mountRemote, checkRemote — remote tests without a host
   devtools/           on-page debug panel
+  rsbuild/            remote build: defineRemoteConfig, shared modules, integrity hashes
 templates/            create:remote templates: vanilla, rwc, react
-config/               remote build: shared modules, integrity hashes
 e2e/, e2e-prod/       end-to-end tests of the dev setup and the production build
 docs/                 architecture, contract, development, migration
 ```

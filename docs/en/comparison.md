@@ -55,7 +55,7 @@ React, a missing context, a failed lazy import.
 
 **In the platform** the contract is explicit and small: a manifest (name, tag, routes, contract
 version, dependencies) and an idempotent `register()`. The host checks the manifest and the
-contract version before loading code, and `checkRemote` from `@mfe/testing` checks the same thing
+contract version before loading code, and `checkRemote` from `@mfe-platform/testing` checks the same thing
 in the remote's CI, without a host.
 
 ### The host knows everyone and is rebuilt for each of them

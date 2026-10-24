@@ -1,4 +1,4 @@
-import { navigateEvent, type PlatformState } from "@mfe/contract";
+import { navigateEvent, type PlatformState } from "@mfe-platform/contract";
 import {
   configCustomComponent,
   css,

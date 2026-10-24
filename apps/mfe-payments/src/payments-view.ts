@@ -1,5 +1,5 @@
-import { subscribeInRender } from "@mfe/adapter-rwc";
-import { navigateEvent, type PlatformState } from "@mfe/contract";
+import { subscribeInRender } from "@mfe-platform/adapter-rwc";
+import { navigateEvent, type PlatformState } from "@mfe-platform/contract";
 import {
   configCustomComponent,
   css,

@@ -1,4 +1,4 @@
-import type { PlatformTopics } from "@mfe/contract";
+import type { PlatformTopics } from "@mfe-platform/contract";
 
 /**
  * Типизированная шина поверх CustomEvent на общем узле. Узел по умолчанию — `document`:

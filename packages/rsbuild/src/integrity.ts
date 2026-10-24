@@ -12,7 +12,7 @@ import type { RsbuildPlugin } from "@rsbuild/core";
  * После production-сборки плагин считает хеш каждого JS- и CSS-файла ремоута, дописывает
  * таблицу в mf-manifest.json и кладёт рядом `mf-manifest.json.integrity` — хеш итогового
  * манифеста, который вносится в конфигурацию хоста при выкладке. Хост проверяет манифест и
- * ставит integrity на каждый скрипт ремоута (createIntegrityPlugin в @mfe/host-runtime).
+ * ставит integrity на каждый скрипт ремоута (createIntegrityPlugin в @mfe-platform/host-runtime).
  *
  * SRI сборщика здесь не помогает: чанки ремоутов загружает рантайм Module Federation хоста,
  * а не рантайм ремоута с его хешами.

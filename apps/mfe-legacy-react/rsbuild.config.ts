@@ -1,5 +1,5 @@
+import { defineRemoteConfig } from "@mfe-platform/rsbuild";
 import { pluginReact } from "@rsbuild/plugin-react";
-import { defineRemoteConfig } from "../../config/rsbuild-remote";
 
 // React не шарится между ремоутами: изоляция важнее размера.
 export default defineRemoteConfig({

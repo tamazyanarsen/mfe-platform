@@ -2,7 +2,7 @@
  * Межмодульное взаимодействие. Темы и нагрузки — типы: несовместимую публикацию
  * ловит компилятор. Потребитель добавляет свои темы слиянием деклараций:
  *
- *   declare module "@mfe/contract" {
+ *   declare module "@mfe-platform/contract" {
  *     interface PlatformTopics { "cards:blocked": { cardId: string } }
  *   }
  */

@@ -1,5 +1,5 @@
 {
-  "name": "@mfe/devtools",
+  "name": "@mfe-platform/devtools",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@mfe/contract": "workspace:*",
-    "@mfe/registry": "workspace:*"
+    "@mfe-platform/contract": "workspace:*",
+    "@mfe-platform/registry": "workspace:*"
   }
 }

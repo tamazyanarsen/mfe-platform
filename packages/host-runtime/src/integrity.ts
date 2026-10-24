@@ -8,7 +8,7 @@ import type { RemoteEntry } from "./config";
  *   remotes[].integrity  ──► mf-manifest.json ремоута (проверяется здесь, в fetch)
  *   mf-manifest.json: metaData.integrity  ──► remoteEntry и каждый чанк (атрибут integrity)
  *
- * Хеши пишет сборка ремоута (config/integrity.ts); `mf-manifest.json.integrity` вносится в
+ * Хеши пишет сборка ремоута (@mfe-platform/rsbuild); `mf-manifest.json.integrity` вносится в
  * конфигурацию хоста при выкладке. Скрипт с адреса проверенного ремоута, которого нет в
  * таблице хешей, блокируется. Ремоут без `integrity` в конфигурации грузится как раньше.
  *

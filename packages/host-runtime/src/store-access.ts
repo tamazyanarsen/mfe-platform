@@ -1,4 +1,8 @@
-import { type ObservabilityTransport, PATCH_EVENT, type PlatformState } from "@mfe/contract";
+import {
+  type ObservabilityTransport,
+  PATCH_EVENT,
+  type PlatformState,
+} from "@mfe-platform/contract";
 
 /**
  * Права ремоутов на общее состояние: какой ремоут какие поля стора может менять.

@@ -1,5 +1,5 @@
 import { describe, expect, spyOn, test } from "bun:test";
-import type { PlatformEvent } from "@mfe/contract";
+import type { PlatformEvent } from "@mfe-platform/contract";
 import { combineTransports, consoleTransport, createMemoryTransport } from "../src";
 
 const event = (type: PlatformEvent["type"], name = "accounts"): PlatformEvent => ({

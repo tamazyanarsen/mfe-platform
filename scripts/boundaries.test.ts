@@ -53,7 +53,7 @@ describe("checkBoundaries", () => {
 
   test("ядро не импортирует адаптеры", () => {
     fixture();
-    file("packages/contract/src/x.ts", 'export * from "@mfe/adapter-rwc";\n');
+    file("packages/contract/src/x.ts", 'export * from "@mfe-platform/adapter-rwc";\n');
     expect(checkBoundaries(root)).toHaveLength(1);
   });
 

@@ -6,7 +6,7 @@ import {
   type PolicyHook,
   type RemoteManifest,
   type RemoteModule,
-} from "@mfe/contract";
+} from "@mfe-platform/contract";
 import {
   combineTransports,
   createMemoryTransport,

@@ -16,17 +16,17 @@
 ```mermaid
 flowchart BT
   subgraph core["Ядро — без UI-фреймворков"]
-    contract["@mfe/contract<br/><small>типы, манифест, навигация,<br/>темы шины, точки расширения</small>"]
-    runtime["@mfe/host-runtime<br/><small>#lt;mfe-outlet#gt;, загрузчик MF,<br/>роутер, транспорты</small>"]
-    registry["@mfe/registry<br/><small>версионированные теги</small>"]
-    bus["@mfe/bus<br/><small>шина и стор</small>"]
+    contract["@mfe-platform/contract<br/><small>типы, манифест, навигация,<br/>темы шины, точки расширения</small>"]
+    runtime["@mfe-platform/host-runtime<br/><small>#lt;mfe-outlet#gt;, загрузчик MF,<br/>роутер, транспорты</small>"]
+    registry["@mfe-platform/registry<br/><small>версионированные теги</small>"]
+    bus["@mfe-platform/bus<br/><small>шина и стор</small>"]
   end
 
   subgraph adapters["Адаптеры и инструменты"]
-    arwc["@mfe/adapter-rwc"]
-    areact["@mfe/adapter-react"]
-    testing["@mfe/testing<br/><small>mountRemote, checkRemote</small>"]
-    devtools["@mfe/devtools<br/><small>панель отладки</small>"]
+    arwc["@mfe-platform/adapter-rwc"]
+    areact["@mfe-platform/adapter-react"]
+    testing["@mfe-platform/testing<br/><small>mountRemote, checkRemote</small>"]
+    devtools["@mfe-platform/devtools<br/><small>панель отладки</small>"]
   end
 
   subgraph apps["Приложения"]
@@ -93,7 +93,7 @@ flowchart LR
       store["Store#lt;PlatformState#gt;<br/><small>session, selected, theme, locale</small>"]
       loader["FederationLoader"]
       tr["Транспорты<br/><small>console + memory → mfe.events()</small>"]
-      dt["@mfe/devtools<br/><small>Alt+Shift+D</small>"]
+      dt["@mfe-platform/devtools<br/><small>Alt+Shift+D</small>"]
     end
 
     subgraph outlets["#lt;mfe-outlet#gt; × N"]
@@ -311,7 +311,7 @@ fallback вместо полуработающего ремоута.
 
 ## 7. Точки расширения
 
-Интерфейсы объявлены в `@mfe/contract`. Ядро везёт реализации по умолчанию; свои
+Интерфейсы объявлены в `@mfe-platform/contract`. Ядро везёт реализации по умолчанию; свои
 подключаются параметрами, без форка.
 
 ```mermaid
@@ -356,7 +356,7 @@ flowchart TB
     a0["bun run create:remote cards<br/>--template vanilla | rwc | react"]
     a1["manifest.ts<br/>name, tag, routes, requires, extra"]
     a2["entry.ts<br/>manifest + идемпотентная register()"]
-    a3["test/contract.test.ts<br/>checkRemote из @mfe/testing"]
+    a3["test/contract.test.ts<br/>checkRemote из @mfe-platform/testing"]
     a5["разработка в стенде:<br/>?mfe-override=cards=http://localhost:3004/…"]
     a4["деплой → mf-manifest.json по адресу"]
     a0 --> a1 --> a2 --> a3 --> a5 --> a4

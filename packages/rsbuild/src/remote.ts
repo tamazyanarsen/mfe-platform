@@ -72,7 +72,7 @@ export const defineRemoteConfig = ({
       pluginModuleFederation({
         name,
         exposes: { "./manifest": "./src/manifest.ts", "./entry": "./src/entry.ts" },
-        // Киты и их фреймворк делятся по линиям совместимости (config/shared.ts): ремоуты
+        // Киты и их фреймворк делятся по линиям совместимости (shared.ts): ремоуты
         // на одной линии кита получают один его экземпляр. MFE_SHARE_CORE=1 — режим
         // эксперимента с singleton-core (experiments/singleton-core), цифры — в docs/architecture.md.
         shared:
@@ -111,6 +111,6 @@ export const defineRemoteConfig = ({
     output: { assetPrefix: process.env.MFE_PUBLIC_PATH ?? publicPath },
     html: { title: `${name} (standalone)` },
     // SRI для чанков в production-сборке: remoteEntry проверяет хеш каждого чанка, который
-    // грузит. Сам remoteEntry закрывает pluginIntegrity (config/integrity.ts).
+    // грузит. Сам remoteEntry закрывает pluginIntegrity (integrity.ts).
     security: { ...extend.security, sri: { enable: "auto", algorithm: "sha384" } },
   });

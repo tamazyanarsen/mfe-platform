@@ -2,7 +2,7 @@
 
 English · [Русский](../contract.md)
 
-Contract version: `CONTRACT_VERSION = 1` (`@mfe/contract`). The contract knows nothing about rwc,
+Contract version: `CONTRACT_VERSION = 1` (`@mfe-platform/contract`). The contract knows nothing about rwc,
 React, or the bundler.
 
 ## What a remote exposes
@@ -13,7 +13,7 @@ React, or the bundler.
 | `./entry` | `manifest`, `register()` | on the first navigation to the remote's route |
 
 `./manifest` must be lightweight: no framework or UI kit imports. The module names are
-`REMOTE_EXPOSES` in `@mfe/contract`.
+`REMOTE_EXPOSES` in `@mfe-platform/contract`.
 
 ```ts
 export interface RemoteManifest {
@@ -84,18 +84,18 @@ its own navigation it dispatches `popstate` so that remote routers see the new U
   the fields open to all remotes (`"*"` in `storeAccess`).
 - Store permissions are protection against mistakes and hidden coupling, not a security boundary: remote
   code runs on the same page.
-- The bus (`@mfe/bus`): `publish(topic, payload)` / `subscribe(topic, handler, { signal })`
+- The bus (`@mfe-platform/bus`): `publish(topic, payload)` / `subscribe(topic, handler, { signal })`
   on top of `CustomEvent` on `document`. Topics and payloads are the `PlatformTopics` interface;
   custom topics are added through declaration merging.
 - A subscription lives while the element is connected: `createSubscriptions()` in a plain custom
-  element, `subscribeInRender()` from `@mfe/adapter-rwc` in an rwc component.
+  element, `subscribeInRender()` from `@mfe-platform/adapter-rwc` in an rwc component.
 
 ## UI kit versions
 
 A remote registers the kit through the registry, not directly:
 
 ```ts
-import { useKit } from "@mfe/adapter-rwc";
+import { useKit } from "@mfe-platform/adapter-rwc";
 import * as ui from "@rwcjs/ui";
 
 useKit({ name: "@rwcjs/ui", version: "0.2.0", consumer: manifest.name, kit: ui, control: ui.Button });
@@ -139,6 +139,6 @@ After an error `outlet.retry()` loads the remote again; the fallback receives th
 
 ## Contract check
 
-`checkRemote` from `@mfe/testing` checks a remote the same way the host does — without a host or network:
+`checkRemote` from `@mfe-platform/testing` checks a remote the same way the host does — without a host or network:
 the manifest, agreement between `./manifest` and `./entry`, the contract version, idempotency of `register()`
 and mounting into a real `<mfe-outlet>`. Details — [development.md](development.md#contract-test-mfetesting).

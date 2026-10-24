@@ -1,4 +1,4 @@
-import { REMOTE_EXPOSES, type RemoteManifest, type RemoteModule } from "@mfe/contract";
+import { REMOTE_EXPOSES, type RemoteManifest, type RemoteModule } from "@mfe-platform/contract";
 
 /**
  * Как хост достаёт ремоут по имени. Интерфейс не знает о сборщике: Module Federation —

@@ -1,7 +1,7 @@
 import "./styles.css";
-import { createBus, createStore } from "@mfe/bus";
-import { PLATFORM_PROP, type PlatformState } from "@mfe/contract";
-import { createDevtools } from "@mfe/devtools";
+import { createBus, createStore } from "@mfe-platform/bus";
+import { PLATFORM_PROP, type PlatformState } from "@mfe-platform/contract";
+import { createDevtools } from "@mfe-platform/devtools";
 import {
   applyRemoteOverrides,
   combineTransports,
@@ -23,8 +23,8 @@ import {
   normalizeBase,
   type RouteMatch,
   withBase,
-} from "@mfe/host-runtime";
-import { getPlatformRegistry } from "@mfe/registry";
+} from "@mfe-platform/host-runtime";
+import { getPlatformRegistry } from "@mfe-platform/registry";
 import { loadRemote, registerPlugins, registerRemotes } from "@module-federation/enhanced/runtime";
 import { loadPlatformConfig, type PlatformConfig } from "./remotes";
 

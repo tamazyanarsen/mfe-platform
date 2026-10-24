@@ -10,7 +10,8 @@ import { join, relative } from "node:path";
 export const CORE_PACKAGES = ["contract", "host-runtime", "registry", "bus"] as const;
 
 const FRAMEWORKS = [/^@rwcjs\//, /^react$/, /^react\//, /^react-dom(\/|$)/];
-const INTERNAL_NON_CORE = [/^@mfe\/adapter-/];
+// Ядро не знает и о сборке: @mfe-platform/rsbuild — инструмент ремоутов, а не рантайм.
+const INTERNAL_NON_CORE = [/^@mfe-platform\/adapter-/, /^@mfe-platform\/rsbuild$/];
 
 export interface Violation {
   readonly file: string;

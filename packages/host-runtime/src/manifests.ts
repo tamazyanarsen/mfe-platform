@@ -1,4 +1,4 @@
-import { type RemoteManifest, validateManifest } from "@mfe/contract";
+import { type RemoteManifest, validateManifest } from "@mfe-platform/contract";
 import type { RemoteLoader } from "./loader";
 
 /**

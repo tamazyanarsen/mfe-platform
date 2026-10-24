@@ -1,5 +1,5 @@
 {
-  "name": "@mfe/host-runtime",
+  "name": "@mfe-platform/host-runtime",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,6 +9,6 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@mfe/contract": "workspace:*"
+    "@mfe-platform/contract": "workspace:*"
   }
 }

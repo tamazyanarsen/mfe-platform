@@ -1,5 +1,5 @@
 {
-  "name": "@mfe/adapter-rwc",
+  "name": "@mfe-platform/adapter-rwc",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,14 +9,14 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@mfe/bus": "workspace:*",
-    "@mfe/registry": "workspace:*"
+    "@mfe-platform/bus": "workspace:*",
+    "@mfe-platform/registry": "workspace:*"
   },
   "peerDependencies": {
     "@rwcjs/core": "^3.3.0"
   },
   "devDependencies": {
-    "@mfe/contract": "workspace:*",
+    "@mfe-platform/contract": "workspace:*",
     "@rwcjs/core": "^3.3.1"
   }
 }

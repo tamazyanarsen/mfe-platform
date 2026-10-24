@@ -6,7 +6,7 @@ import {
   type PolicyHook,
   type RemoteManifest,
   validateManifest,
-} from "@mfe/contract";
+} from "@mfe-platform/contract";
 import type { RemoteLoader } from "./loader";
 import { consoleTransport } from "./transports";
 

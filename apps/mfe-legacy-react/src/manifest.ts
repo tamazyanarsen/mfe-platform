@@ -1,4 +1,4 @@
-import { CONTRACT_VERSION, type RemoteManifest } from "@mfe/contract";
+import { CONTRACT_VERSION, type RemoteManifest } from "@mfe-platform/contract";
 
 // Лёгкий модуль без React: хост читает его, не загружая код ремоута.
 export const manifest: RemoteManifest = {

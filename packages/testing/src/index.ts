@@ -4,7 +4,7 @@ import {
   type RemoteManifest,
   type RemoteModule,
   validateManifest,
-} from "@mfe/contract";
+} from "@mfe-platform/contract";
 import {
   createMemoryTransport,
   defineMfeOutlet,
@@ -14,7 +14,7 @@ import {
   type OutletState,
   type RemoteLoader,
   whenOutletSettles,
-} from "@mfe/host-runtime";
+} from "@mfe-platform/host-runtime";
 
 /**
  * Помощники для тестов ремоута: смонтировать его так, как это сделает хост, и проверить

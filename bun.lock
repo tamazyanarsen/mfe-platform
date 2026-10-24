@@ -17,11 +17,11 @@
     "apps/host": {
       "name": "@mfe-app/host",
       "dependencies": {
-        "@mfe/bus": "workspace:*",
-        "@mfe/contract": "workspace:*",
-        "@mfe/devtools": "workspace:*",
-        "@mfe/host-runtime": "workspace:*",
-        "@mfe/registry": "workspace:*",
+        "@mfe-platform/bus": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
+        "@mfe-platform/devtools": "workspace:*",
+        "@mfe-platform/host-runtime": "workspace:*",
+        "@mfe-platform/registry": "workspace:*",
         "@module-federation/enhanced": "2.9.2",
       },
       "devDependencies": {
@@ -33,15 +33,16 @@
       "name": "@mfe-app/accounts",
       "version": "0.1.0",
       "dependencies": {
-        "@mfe/adapter-rwc": "workspace:*",
-        "@mfe/bus": "workspace:*",
-        "@mfe/contract": "workspace:*",
+        "@mfe-platform/adapter-rwc": "workspace:*",
+        "@mfe-platform/bus": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
         "@rwcjs/core": "^3.3.1",
         "@rwcjs/router": "^0.1.1",
         "@rwcjs/ui": "file:../../vendor/rwcjs-ui-0.2.0-next.0.tgz",
       },
       "devDependencies": {
-        "@mfe/testing": "workspace:*",
+        "@mfe-platform/rsbuild": "workspace:*",
+        "@mfe-platform/testing": "workspace:*",
         "@module-federation/rsbuild-plugin": "^2.9.2",
         "@rsbuild/core": "^2.2.14",
       },
@@ -50,13 +51,14 @@
       "name": "@mfe-app/legacy-react",
       "version": "0.1.0",
       "dependencies": {
-        "@mfe/adapter-react": "workspace:*",
-        "@mfe/contract": "workspace:*",
+        "@mfe-platform/adapter-react": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
       },
       "devDependencies": {
-        "@mfe/testing": "workspace:*",
+        "@mfe-platform/rsbuild": "workspace:*",
+        "@mfe-platform/testing": "workspace:*",
         "@module-federation/rsbuild-plugin": "^2.9.2",
         "@rsbuild/core": "^2.2.14",
         "@rsbuild/plugin-react": "^2.1.1",
@@ -68,15 +70,16 @@
       "name": "@mfe-app/payments",
       "version": "0.1.0",
       "dependencies": {
-        "@mfe/adapter-rwc": "workspace:*",
-        "@mfe/bus": "workspace:*",
-        "@mfe/contract": "workspace:*",
+        "@mfe-platform/adapter-rwc": "workspace:*",
+        "@mfe-platform/bus": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
         "@rwcjs/core": "^3.3.1",
         "@rwcjs/router": "^0.1.1",
         "@rwcjs/ui": "0.1.0",
       },
       "devDependencies": {
-        "@mfe/testing": "workspace:*",
+        "@mfe-platform/rsbuild": "workspace:*",
+        "@mfe-platform/testing": "workspace:*",
         "@module-federation/rsbuild-plugin": "^2.9.2",
         "@rsbuild/core": "^2.2.14",
       },
@@ -85,13 +88,14 @@
       "name": "@mfe-app/probe",
       "version": "0.1.0",
       "dependencies": {
-        "@mfe/adapter-rwc": "workspace:*",
-        "@mfe/contract": "workspace:*",
+        "@mfe-platform/adapter-rwc": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
         "@rwcjs/core": "^3.3.1",
         "@rwcjs/ui": "0.1.0",
       },
       "devDependencies": {
-        "@mfe/testing": "workspace:*",
+        "@mfe-platform/rsbuild": "workspace:*",
+        "@mfe-platform/testing": "workspace:*",
         "@module-federation/rsbuild-plugin": "^2.9.2",
         "@rsbuild/core": "^2.2.14",
       },
@@ -104,10 +108,10 @@
       },
     },
     "packages/adapter-react": {
-      "name": "@mfe/adapter-react",
+      "name": "@mfe-platform/adapter-react",
       "version": "0.0.0",
       "devDependencies": {
-        "@mfe/contract": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.2.0",
         "react": "^19.3.1",
@@ -119,14 +123,14 @@
       },
     },
     "packages/adapter-rwc": {
-      "name": "@mfe/adapter-rwc",
+      "name": "@mfe-platform/adapter-rwc",
       "version": "0.0.0",
       "dependencies": {
-        "@mfe/bus": "workspace:*",
-        "@mfe/registry": "workspace:*",
+        "@mfe-platform/bus": "workspace:*",
+        "@mfe-platform/registry": "workspace:*",
       },
       "devDependencies": {
-        "@mfe/contract": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
         "@rwcjs/core": "^3.3.1",
       },
       "peerDependencies": {
@@ -134,44 +138,55 @@
       },
     },
     "packages/bus": {
-      "name": "@mfe/bus",
+      "name": "@mfe-platform/bus",
       "version": "0.0.0",
       "dependencies": {
-        "@mfe/contract": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
       },
     },
     "packages/contract": {
-      "name": "@mfe/contract",
+      "name": "@mfe-platform/contract",
       "version": "0.0.0",
     },
     "packages/devtools": {
-      "name": "@mfe/devtools",
+      "name": "@mfe-platform/devtools",
       "version": "0.0.0",
       "dependencies": {
-        "@mfe/contract": "workspace:*",
-        "@mfe/registry": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
+        "@mfe-platform/registry": "workspace:*",
       },
     },
     "packages/host-runtime": {
-      "name": "@mfe/host-runtime",
+      "name": "@mfe-platform/host-runtime",
       "version": "0.0.0",
       "dependencies": {
-        "@mfe/contract": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
       },
     },
     "packages/registry": {
-      "name": "@mfe/registry",
+      "name": "@mfe-platform/registry",
       "version": "0.0.0",
       "dependencies": {
-        "@mfe/contract": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
+      },
+    },
+    "packages/rsbuild": {
+      "name": "@mfe-platform/rsbuild",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@mfe-platform/host-runtime": "workspace:*",
+      },
+      "peerDependencies": {
+        "@module-federation/rsbuild-plugin": "^2.9.0",
+        "@rsbuild/core": "^2.2.0",
       },
     },
     "packages/testing": {
-      "name": "@mfe/testing",
+      "name": "@mfe-platform/testing",
       "version": "0.0.0",
       "dependencies": {
-        "@mfe/contract": "workspace:*",
-        "@mfe/host-runtime": "workspace:*",
+        "@mfe-platform/contract": "workspace:*",
+        "@mfe-platform/host-runtime": "workspace:*",
       },
     },
   },
@@ -218,21 +233,23 @@
 
     "@mfe-experiments/all": ["@mfe-experiments/all@workspace:experiments"],
 
-    "@mfe/adapter-react": ["@mfe/adapter-react@workspace:packages/adapter-react"],
+    "@mfe-platform/adapter-react": ["@mfe-platform/adapter-react@workspace:packages/adapter-react"],
 
-    "@mfe/adapter-rwc": ["@mfe/adapter-rwc@workspace:packages/adapter-rwc"],
+    "@mfe-platform/adapter-rwc": ["@mfe-platform/adapter-rwc@workspace:packages/adapter-rwc"],
 
-    "@mfe/bus": ["@mfe/bus@workspace:packages/bus"],
+    "@mfe-platform/bus": ["@mfe-platform/bus@workspace:packages/bus"],
 
-    "@mfe/contract": ["@mfe/contract@workspace:packages/contract"],
+    "@mfe-platform/contract": ["@mfe-platform/contract@workspace:packages/contract"],
 
-    "@mfe/devtools": ["@mfe/devtools@workspace:packages/devtools"],
+    "@mfe-platform/devtools": ["@mfe-platform/devtools@workspace:packages/devtools"],
 
-    "@mfe/host-runtime": ["@mfe/host-runtime@workspace:packages/host-runtime"],
+    "@mfe-platform/host-runtime": ["@mfe-platform/host-runtime@workspace:packages/host-runtime"],
 
-    "@mfe/registry": ["@mfe/registry@workspace:packages/registry"],
+    "@mfe-platform/registry": ["@mfe-platform/registry@workspace:packages/registry"],
 
-    "@mfe/testing": ["@mfe/testing@workspace:packages/testing"],
+    "@mfe-platform/rsbuild": ["@mfe-platform/rsbuild@workspace:packages/rsbuild"],
+
+    "@mfe-platform/testing": ["@mfe-platform/testing@workspace:packages/testing"],
 
     "@module-federation/bridge-react-webpack-plugin": ["@module-federation/bridge-react-webpack-plugin@2.9.2", "", { "dependencies": { "@module-federation/sdk": "2.9.2" } }, "sha512-6ikuvP1639g8jzSxveDLz/BOk0VTIkO7aSuvrZgq0waB0h553zFtkTJAXQETezzO+s1taHGhEvFoCtl6DJWu6A=="],
 

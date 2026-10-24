@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { sharedByLine } from "./shared";
+import { sharedByLine } from "../src/shared";
 
 describe("sharedByLine", () => {
   test("каждый пакет делится по своей линии совместимости и не как singleton", () => {

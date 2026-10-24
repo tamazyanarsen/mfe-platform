@@ -9,15 +9,16 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@mfe/adapter-rwc": "workspace:*",
-    "@mfe/bus": "workspace:*",
-    "@mfe/contract": "workspace:*",
+    "@mfe-platform/adapter-rwc": "workspace:*",
+    "@mfe-platform/bus": "workspace:*",
+    "@mfe-platform/contract": "workspace:*",
     "@rwcjs/core": "^3.3.1",
     "@rwcjs/router": "^0.1.1",
     "@rwcjs/ui": "file:../../vendor/rwcjs-ui-0.2.0-next.0.tgz"
   },
   "devDependencies": {
-    "@mfe/testing": "workspace:*",
+    "@mfe-platform/rsbuild": "workspace:*",
+    "@mfe-platform/testing": "workspace:*",
     "@module-federation/rsbuild-plugin": "^2.9.2",
     "@rsbuild/core": "^2.2.14"
   },

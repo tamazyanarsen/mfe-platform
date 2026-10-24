@@ -1,4 +1,4 @@
-import { useKit } from "@mfe/adapter-rwc";
+import { useKit } from "@mfe-platform/adapter-rwc";
 import * as ui from "@rwcjs/ui";
 import { manifest } from "./manifest";
 

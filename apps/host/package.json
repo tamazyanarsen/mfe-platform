@@ -12,11 +12,11 @@
     "@rsbuild/core": "^2.2.14"
   },
   "dependencies": {
-    "@mfe/bus": "workspace:*",
-    "@mfe/contract": "workspace:*",
-    "@mfe/devtools": "workspace:*",
-    "@mfe/host-runtime": "workspace:*",
-    "@mfe/registry": "workspace:*",
+    "@mfe-platform/bus": "workspace:*",
+    "@mfe-platform/contract": "workspace:*",
+    "@mfe-platform/devtools": "workspace:*",
+    "@mfe-platform/host-runtime": "workspace:*",
+    "@mfe-platform/registry": "workspace:*",
     "@module-federation/enhanced": "2.9.2"
   }
 }

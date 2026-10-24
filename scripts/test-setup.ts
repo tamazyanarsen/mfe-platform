@@ -3,7 +3,7 @@ import { GlobalRegistrator } from "@happy-dom/global-registrator";
 // http-адрес, а не about:blank: роутеру хоста нужна рабочая History API.
 GlobalRegistrator.register({ url: "http://localhost:3000/" });
 
-// Константы, которые в ремоутах подставляет сборка (config/rsbuild-remote.ts). Тест ремоута
+// Константы, которые в ремоутах подставляет сборка (defineRemoteConfig в @mfe-platform/rsbuild). Тест ремоута
 // может выставить свои значения до импорта его модулей.
 const scope = globalThis as Record<string, unknown>;
 scope.__MFE_REMOTE_VERSION__ ??= "0.0.0-test";

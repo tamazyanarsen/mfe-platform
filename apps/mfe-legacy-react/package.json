@@ -9,13 +9,14 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "@mfe/adapter-react": "workspace:*",
-    "@mfe/contract": "workspace:*",
+    "@mfe-platform/adapter-react": "workspace:*",
+    "@mfe-platform/contract": "workspace:*",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@mfe/testing": "workspace:*",
+    "@mfe-platform/rsbuild": "workspace:*",
+    "@mfe-platform/testing": "workspace:*",
     "@module-federation/rsbuild-plugin": "^2.9.2",
     "@rsbuild/core": "^2.2.14",
     "@rsbuild/plugin-react": "^2.1.1",

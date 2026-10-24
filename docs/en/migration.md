@@ -11,7 +11,7 @@ Add two modules and keep the old `exposes` until the host has moved over.
 
 ```ts
 // src/manifest.ts — no framework imports
-import { CONTRACT_VERSION, type RemoteManifest } from "@mfe/contract";
+import { CONTRACT_VERSION, type RemoteManifest } from "@mfe-platform/contract";
 
 export const manifest: RemoteManifest = {
   contractVersion: CONTRACT_VERSION,
@@ -24,7 +24,7 @@ export const manifest: RemoteManifest = {
 
 ```ts
 // src/entry.ts — React
-import { registerReactElement } from "@mfe/adapter-react";
+import { registerReactElement } from "@mfe-platform/adapter-react";
 import { App } from "./App";
 export { manifest } from "./manifest";
 
@@ -45,7 +45,7 @@ exposes: {
 ```
 
 For an rwc remote, `register()` calls `registerXxx()` from `configCustomComponent`, and registers the kit
-through `useKit` from `@mfe/adapter-rwc`.
+through `useKit` from `@mfe-platform/adapter-rwc`.
 
 ## 2. Remote: router relative to `basename`
 
@@ -56,7 +56,7 @@ Navigation to other remotes' routes goes through the `platform:navigate` event, 
 ## 3. Host: replace manual mounting with `<mfe-outlet>`
 
 ```ts
-import { createFederationLoader, createHostRouter, createRouteTable, defineMfeOutlet } from "@mfe/host-runtime";
+import { createFederationLoader, createHostRouter, createRouteTable, defineMfeOutlet } from "@mfe-platform/host-runtime";
 import { loadRemote, registerRemotes } from "@module-federation/enhanced/runtime";
 
 registerRemotes([{ name: "billing", entry: "https://cdn.bank.local/billing/mf-manifest.json" }]);
@@ -81,7 +81,7 @@ runtime, and the URLs live in the host configuration. It is convenient to keep i
 read it at startup — then a new URL does not require a rebuild:
 
 ```ts
-import { loadJsonConfig, type RemoteEntry, validateRemoteEntries } from "@mfe/host-runtime";
+import { loadJsonConfig, type RemoteEntry, validateRemoteEntries } from "@mfe-platform/host-runtime";
 
 const remotes = await loadJsonConfig<RemoteEntry[]>("/remotes.json", validateRemoteEntries);
 registerRemotes(remotes);
@@ -105,7 +105,7 @@ different copies it does not work. Shared state moves to the host store and the
 Add the contract test to the remote's CI — it catches mismatches before the host sees them:
 
 ```ts
-import { checkRemote } from "@mfe/testing";
+import { checkRemote } from "@mfe-platform/testing";
 import * as entry from "../src/entry";
 import { manifest } from "../src/manifest";
 

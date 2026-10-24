@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { RemoteModule } from "@mfe/contract";
-import { checkRemote } from "@mfe/testing";
+import type { RemoteModule } from "@mfe-platform/contract";
+import { checkRemote } from "@mfe-platform/testing";
 
 // Сборка подставляет версию кита, с которой собран ремоут; тест делает то же до импорта.
 const installed = (pkg: string) =>

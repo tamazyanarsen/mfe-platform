@@ -4,7 +4,7 @@ import {
   type StoreAccess,
   validateRemoteEntries,
   validateStoreAccess,
-} from "@mfe/host-runtime";
+} from "@mfe-platform/host-runtime";
 
 /**
  * Конфигурация хоста: какие ремоуты есть, где их MF-манифесты, что в навигации и на обзоре.

@@ -2,7 +2,7 @@
 
 [English](en/contract.md) · Русский
 
-Версия контракта: `CONTRACT_VERSION = 1` (`@mfe/contract`). Контракт не знает ни о rwc, ни
+Версия контракта: `CONTRACT_VERSION = 1` (`@mfe-platform/contract`). Контракт не знает ни о rwc, ни
 о React, ни о сборщике.
 
 ## Что ремоут экспонирует
@@ -13,7 +13,7 @@
 | `./entry` | `manifest`, `register()` | при первом переходе на маршрут ремоута |
 
 `./manifest` должен быть лёгким: никаких импортов фреймворка и UI-кита. Имена модулей —
-`REMOTE_EXPOSES` в `@mfe/contract`.
+`REMOTE_EXPOSES` в `@mfe-platform/contract`.
 
 ```ts
 export interface RemoteManifest {
@@ -84,18 +84,18 @@ outlet) и передаёт ему:
   поля, открытые всем ремоутам (`"*"` в `storeAccess`).
 - Права на стор — защита от ошибок и незаметной связности, а не граница безопасности: код
   ремоутов работает на одной странице.
-- Шина (`@mfe/bus`): `publish(topic, payload)` / `subscribe(topic, handler, { signal })`
+- Шина (`@mfe-platform/bus`): `publish(topic, payload)` / `subscribe(topic, handler, { signal })`
   поверх `CustomEvent` на `document`. Темы и нагрузки — интерфейс `PlatformTopics`;
   свои темы добавляются слиянием деклараций.
 - Подписка живёт, пока подключён элемент: `createSubscriptions()` в обычном кастомном
-  элементе, `subscribeInRender()` из `@mfe/adapter-rwc` в компоненте rwc.
+  элементе, `subscribeInRender()` из `@mfe-platform/adapter-rwc` в компоненте rwc.
 
 ## Версии UI-кита
 
 Ремоут регистрирует кит через реестр, а не напрямую:
 
 ```ts
-import { useKit } from "@mfe/adapter-rwc";
+import { useKit } from "@mfe-platform/adapter-rwc";
 import * as ui from "@rwcjs/ui";
 
 useKit({ name: "@rwcjs/ui", version: "0.2.0", consumer: manifest.name, kit: ui, control: ui.Button });
@@ -139,6 +139,6 @@ outlet: показывается fallback, событие `mount:error` уход
 
 ## Проверка контракта
 
-`checkRemote` из `@mfe/testing` проверяет ремоут так же, как хост, — без хоста и сети:
+`checkRemote` из `@mfe-platform/testing` проверяет ремоут так же, как хост, — без хоста и сети:
 манифест, согласие `./manifest` и `./entry`, версию контракта, идемпотентность `register()`
 и монтирование в настоящий `<mfe-outlet>`. Подробно — [development.md](development.md#тест-контракта-mfetesting).

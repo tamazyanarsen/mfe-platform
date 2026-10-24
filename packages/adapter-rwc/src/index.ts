@@ -1,5 +1,9 @@
-import type { Bus } from "@mfe/bus";
-import { getPlatformRegistry, type KitRegistrationResult, type TagRegistry } from "@mfe/registry";
+import type { Bus } from "@mfe-platform/bus";
+import {
+  getPlatformRegistry,
+  type KitRegistrationResult,
+  type TagRegistry,
+} from "@mfe-platform/registry";
 import { effect, onCleanup, untracked } from "@rwcjs/core";
 
 /** Кит на rwc: регистрирует все свои компоненты с постфиксом (`@rwcjs/ui` и совместимые). */

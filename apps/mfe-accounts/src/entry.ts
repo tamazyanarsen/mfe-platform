@@ -1,4 +1,4 @@
-import type { RemoteModule } from "@mfe/contract";
+import type { RemoteModule } from "@mfe-platform/contract";
 import { registerAccountsView } from "./accounts-view";
 import { registerKit } from "./kit";
 

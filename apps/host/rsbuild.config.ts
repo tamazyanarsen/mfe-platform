@@ -10,7 +10,7 @@ export default defineConfig({
       shared: {},
       dts: false,
       // Хост отдаёт свой рантайм MF ремоутам: в production они его не везут
-      // (sharedRuntime в config/rsbuild-remote.ts).
+      // (sharedRuntime в @mfe-platform/rsbuild).
       experiments: { provideExternalRuntime: true },
     }),
   ],

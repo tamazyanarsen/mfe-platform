@@ -5,7 +5,7 @@
     "apps/*/src",
     "apps/*/test",
     "apps/*/rsbuild.config.ts",
-    "config",
+    "packages/rsbuild/env.d.ts",
     "scripts",
     "experiments",
     "e2e",

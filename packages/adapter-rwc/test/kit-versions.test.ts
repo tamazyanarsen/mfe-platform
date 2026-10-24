@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { createTagRegistry } from "@mfe/registry";
+import { createTagRegistry } from "@mfe-platform/registry";
 import {
   button,
   type CustomTagName,

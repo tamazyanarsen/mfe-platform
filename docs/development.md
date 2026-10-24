@@ -17,7 +17,7 @@ bun run dev
 | Параметр | По умолчанию | Что делает |
 | --- | --- | --- |
 | `<name>` | — | имя ремоута: строчные буквы, цифры и `_` (`cards`, `credit_cards`) |
-| `--template` | `vanilla` | `vanilla` — голый кастомный элемент, `rwc` — компонент rwc, `react` — React через `@mfe/adapter-react` |
+| `--template` | `vanilla` | `vanilla` — голый кастомный элемент, `rwc` — компонент rwc, `react` — React через `@mfe-platform/adapter-react` |
 | `--port` | следующий за занятыми | порт dev-сервера |
 | `--title` | имя в PascalCase | заголовок страницы и пункта навигации |
 | `--no-nav` | — | не добавлять пункт навигации (ремоут-виджет) |
@@ -33,13 +33,13 @@ JS-идентификатором: дефис не подходит. Тег эл
 Шаблоны лежат в `templates/`. `bun run check:templates` генерирует каждый, ставит, прогоняет
 его тест и собирает, а потом возвращает репозиторий как был; та же проверка идёт в CI.
 
-## Тест контракта: `@mfe/testing`
+## Тест контракта: `@mfe-platform/testing`
 
 Ремоут проверяется так же, как его проверит хост, — без хоста, Module Federation и сети:
 
 ```ts
 import { expect, test } from "bun:test";
-import { checkRemote, mountRemote } from "@mfe/testing";
+import { checkRemote, mountRemote } from "@mfe-platform/testing";
 import * as entry from "../src/entry";
 import { manifest } from "../src/manifest";
 
@@ -104,7 +104,7 @@ https://platform.bank.example/?mfe-override=cards=http://localhost:3004/mf-manif
 - Действуют те же ограничения: только локальные адреса, имя — JS-идентификатор.
 - Хост, которому это не нужно, отключает добавление: `applyRemoteOverrides(remotes, { allowNew: false })`.
 
-## Панель отладки: `@mfe/devtools`
+## Панель отладки: `@mfe-platform/devtools`
 
 Панель на странице показывает:
 
@@ -120,7 +120,7 @@ https://platform.bank.example/?mfe-override=cards=http://localhost:3004/mf-manif
 Подключение в своём хосте — как ещё один транспорт наблюдаемости:
 
 ```ts
-import { createDevtools } from "@mfe/devtools";
+import { createDevtools } from "@mfe-platform/devtools";
 
 const devtools = createDevtools({ overrides });
 defineMfeOutlet({ loader, transport: combineTransports(consoleTransport, devtools.transport) });
@@ -143,7 +143,7 @@ getPlatformRegistry().setTransport(devtools.transport);
 }
 ```
 
-Файл проверяется при загрузке (`validateRemoteEntries` из `@mfe/host-runtime` и проверка
+Файл проверяется при загрузке (`validateRemoteEntries` из `@mfe-platform/host-runtime` и проверка
 хоста): при ошибке хост показывает сообщение вместо пустой страницы, а в консоли — все
 проблемы сразу. Манифест ремоута, который не прошёл `validateManifest`, в таблицу маршрутов
 не попадает; остальные ремоуты работают.
@@ -174,7 +174,7 @@ getPlatformRegistry().setTransport(devtools.transport);
      "integrity": "sha384-…" }
    ```
 
-3. Хост (`createIntegrityPlugin` из `@mfe/host-runtime`) проверяет манифест по этому хешу и
+3. Хост (`createIntegrityPlugin` из `@mfe-platform/host-runtime`) проверяет манифест по этому хешу и
    ставит `integrity` и `crossorigin="anonymous"` на remoteEntry и каждый чанк. Файл с адреса
    проверенного ремоута, которого нет в таблице хешей, блокируется. Нарушение — событие
    `integrity:denied` в транспорте и в панели отладки.
@@ -197,7 +197,7 @@ remoteEntry и чанк.
 Ремоут просит изменить общее состояние событием со своего элемента:
 
 ```ts
-import { patchEvent } from "@mfe/contract";
+import { patchEvent } from "@mfe-platform/contract";
 
 this.dispatchEvent(patchEvent({ theme: "dark" }));
 ```
@@ -229,7 +229,7 @@ this.dispatchEvent(patchEvent({ theme: "dark" }));
 
 ## Общие модули
 
-`defineRemoteConfig` (config/rsbuild-remote.ts) решает, что ремоут делит с другими:
+`defineRemoteConfig` из `@mfe-platform/rsbuild` решает, что ремоут делит с другими:
 
 | Опция | По умолчанию | Что делает |
 | --- | --- | --- |

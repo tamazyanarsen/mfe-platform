@@ -3,7 +3,7 @@ import {
   type ObservabilityTransport,
   type PolicyHook,
   type RegisterContext,
-} from "@mfe/contract";
+} from "@mfe-platform/contract";
 import { postfixFor } from "./postfix";
 
 /**

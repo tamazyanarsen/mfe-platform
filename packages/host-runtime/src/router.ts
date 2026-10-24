@@ -1,4 +1,4 @@
-import { NAVIGATE_EVENT, type NavigateDetail, type RemoteManifest } from "@mfe/contract";
+import { NAVIGATE_EVENT, type NavigateDetail, type RemoteManifest } from "@mfe-platform/contract";
 
 /**
  * Роутер хоста: таблица маршрутов из манифестов и единственный владелец истории.

@@ -1,4 +1,4 @@
-import type { ObservabilityTransport, PlatformEvent } from "@mfe/contract";
+import type { ObservabilityTransport, PlatformEvent } from "@mfe-platform/contract";
 
 /** Пишет события в консоль браузера. Ошибки — через console.error, остальное — debug. */
 export const consoleTransport: ObservabilityTransport = {
