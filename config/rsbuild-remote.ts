@@ -67,7 +67,7 @@ export const defineRemoteConfig = ({
         exposes: { "./manifest": "./src/manifest.ts", "./entry": "./src/entry.ts" },
         // Киты и их фреймворк делятся по линиям совместимости (config/shared.ts): ремоуты
         // на одной линии кита получают один его экземпляр. MFE_SHARE_CORE=1 — режим
-        // эксперимента с singleton-core (experiments/r4), цифры — в docs/architecture.md.
+        // эксперимента с singleton-core (experiments/singleton-core), цифры — в docs/architecture.md.
         shared:
           process.env.MFE_SHARE_CORE === "1"
             ? { "@rwcjs/core": { singleton: true, requiredVersion: "^3.2.0" } }

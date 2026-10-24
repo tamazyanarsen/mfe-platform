@@ -408,7 +408,7 @@ flowchart TB
 Цена общего рантайма: мажор `@module-federation/*` у хоста и ремоутов должен совпадать. В dev
 ремоут везёт рантайм сам и открывается без хоста.
 
-Почему не singleton core — замер (`experiments/r4/measure.ts`, до общего рантайма MF):
+Почему не singleton core — замер (`experiments/singleton-core/measure.ts`, до общего рантайма MF):
 
 | Режим | host | accounts | payments | Всего |
 | --- | ---: | ---: | ---: | ---: |

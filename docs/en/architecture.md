@@ -408,7 +408,7 @@ remotes to one version, and an upgrade would become a joint release of all teams
 The cost of the shared runtime: the major version of `@module-federation/*` must match in the host and the remotes. In dev
 a remote ships the runtime itself and opens without a host.
 
-Why not a singleton core — measurement (`experiments/r4/measure.ts`, before the shared MF runtime):
+Why not a singleton core — measurement (`experiments/singleton-core/measure.ts`, before the shared MF runtime):
 
 | Mode | host | accounts | payments | Total |
 | --- | ---: | ---: | ---: | ---: |

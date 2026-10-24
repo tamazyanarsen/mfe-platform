@@ -48,7 +48,7 @@ const mountPair = async (provider: Core, consumer: Core, { sharedKey = false } =
       return consumer.span(theme);
     }
   }
-  const child = consumer.useCustomComponent(Child, `r4-child-${id}`);
+  const child = consumer.useCustomComponent(Child, `exp-child-${id}`);
 
   class Parent extends provider.defineComponent({ props: {} }) {
     render() {
@@ -56,7 +56,7 @@ const mountPair = async (provider: Core, consumer: Core, { sharedKey = false } =
       return provider.div({}, child());
     }
   }
-  const parent = provider.useCustomComponent(Parent, `r4-parent-${id}`);
+  const parent = provider.useCustomComponent(Parent, `exp-parent-${id}`);
 
   document.body.append(provider.createRoot(() => parent()));
   await new Promise((resolve) => setTimeout(resolve, 0));
