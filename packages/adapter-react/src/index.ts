@@ -2,7 +2,7 @@ import { type ComponentType, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
 /**
- * Обёртка-кастомный-элемент для ремоута на React (A7). Для платформы React-ремоут ничем не
+ * Обёртка-кастомный-элемент для ремоута на React. Для платформы React-ремоут ничем не
  * отличается от любого другого: элемент, свойства на вход, CustomEvent на выход.
  *
  * - `connectedCallback` — `createRoot().render()`, `disconnectedCallback` — `unmount()`;

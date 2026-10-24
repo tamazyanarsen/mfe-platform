@@ -101,7 +101,7 @@ class AccountsView extends defineComponent({
               { class: "actions" },
               rwcTooltip(
                 {},
-                // Чужой маршрут: просим хост, историю сами не трогаем (Р3).
+                // Чужой маршрут: просим хост, историю сами не трогаем.
                 rwcButton(
                   {
                     ".variant": "primary",

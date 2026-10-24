@@ -89,9 +89,9 @@ docs/                 контракт, рецепт миграции
 
 ## Документы
 
-- [PLAN.md](PLAN.md) — план и архитектурные решения
-- [DECISIONS.md](DECISIONS.md) — принятые решения с цифрами
-- [OPEN-QUESTIONS.md](OPEN-QUESTIONS.md) — что решает человек
+- [docs/architecture.md](docs/architecture.md) — схемы: пакеты, страница, монтирование, взаимодействие ремоутов
+- [docs/contract.md](docs/contract.md) — контракт ремоута
+- [docs/migration.md](docs/migration.md) — перевод существующей MF-сборки
 
 ## Лицензия
 

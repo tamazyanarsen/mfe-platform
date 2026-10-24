@@ -32,7 +32,7 @@ const fallback = ({ state, remote, message }: FallbackContext): Node => {
 
 registerRemotes(REMOTES.map(({ name, entry }) => ({ name, entry })));
 const loader = createFederationLoader(loadRemote);
-// Наблюдаемость открытой части: консоль и кольцевой буфер в памяти (Р7 — наружу ничего).
+// Наблюдаемость открытой части: консоль и кольцевой буфер в памяти (наружу ничего).
 const events = createMemoryTransport(500);
 const outletTag = defineMfeOutlet({
   loader,
@@ -43,7 +43,7 @@ const outletTag = defineMfeOutlet({
 // ---------------------------------------------------------------- общее состояние
 
 // Стор живёт в хосте. Ремоуты получают состояние свойством `platform` своего элемента и
-// просят изменений через шину — без общего рантайма и без привязки к фреймворку (Р4, Р6).
+// просят изменений через шину — без общего рантайма и без привязки к фреймворку.
 const store = createStore<PlatformState>({
   session: { userId: "u-1", name: "Анна Иванова" },
   selected: null,

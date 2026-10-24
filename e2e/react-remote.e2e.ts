@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
-/** A7: ремоут на React монтируется тем же <mfe-outlet>, без ветвления «если React» в хосте. */
+/** Ремоут на React монтируется тем же <mfe-outlet>, без ветвления «если React» в хосте. */
 
 const liveRoots = (page: Page) =>
   page.evaluate(

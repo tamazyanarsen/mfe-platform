@@ -226,7 +226,7 @@ describe("<mfe-outlet>", () => {
   });
 });
 
-describe("A6: изоляция ошибок и наблюдаемость", () => {
+describe("изоляция ошибок и наблюдаемость", () => {
   /** Ремоут, который падает при отрисовке. */
   const crashingRemote = (name: string) => {
     const remote = fakeRemote(name, { version: "1.4.2", extra: { team: "cards" } });

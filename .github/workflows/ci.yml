@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      # Р6 и граница лицензирования: ядро не знает о фреймворках и платных пакетах.
+      # Границы пакетов: ядро не знает о фреймворках и платных пакетах.
       - run: bun run check:boundaries
       - run: bun run lint
       - run: bun run typecheck

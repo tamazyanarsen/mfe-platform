@@ -2,7 +2,7 @@ import type { PlatformTopics } from "@mfe/contract";
 
 /**
  * Типизированная шина поверх CustomEvent на общем узле. Узел по умолчанию — `document`:
- * у каждого ремоута своя копия этого пакета (Р4), а `document` у всех один.
+ * у каждого ремоута своя копия этого пакета, а `document` у всех один.
  */
 export interface Bus<Topics> {
   publish<K extends keyof Topics & string>(topic: K, payload: Topics[K]): void;

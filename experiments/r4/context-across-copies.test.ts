@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
 /**
- * Эксперимент Р4: доходит ли provide/inject rwc через границу двух ремоутов.
+ * Эксперимент: доходит ли provide/inject rwc через границу двух ремоутов.
  * У изолированных ремоутов — две копии @rwcjs/core; у общего синглтона — одна.
  * Копию моделируем загрузкой того же dist из другой папки: это другой экземпляр модуля.
  */
@@ -64,7 +64,7 @@ const mountPair = async (provider: Core, consumer: Core, { sharedKey = false } =
   return seen;
 };
 
-describe("Р4: provide/inject между ремоутами", () => {
+describe("provide/inject между ремоутами", () => {
   test("одна копия core (общий синглтон) — контекст доходит", async () => {
     expect(await mountPair(coreA, coreA)).toBe("dark");
   });

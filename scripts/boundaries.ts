@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 /**
- * Архитектурные границы репозитория (PLAN.md, Р6 и раздел 2).
+ * Архитектурные границы репозитория (docs/architecture.md, раздел 1).
  *
  * 1. Ядро платформы не зависит ни от одного UI-фреймворка: ни rwc, ни React.
  * 2. Ядро не знает об адаптерах и приложениях — зависимость только в обратную сторону.
@@ -80,7 +80,7 @@ export const checkBoundaries = (root: string): Violation[] => {
     const dir = join(root, "packages", name);
     if ((CORE_PACKAGES as readonly string[]).includes(name)) {
       scan(dir, [
-        ["core package depends on a UI framework (Р6)", FRAMEWORKS],
+        ["core package depends on a UI framework", FRAMEWORKS],
         ["core package depends on an adapter", INTERNAL_NON_CORE],
         paidRule,
       ]);

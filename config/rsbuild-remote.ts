@@ -19,7 +19,7 @@ const installedVersion = (pkg: string): string =>
 
 /**
  * Общая сборка ремоута: экспонирует `./manifest` и `./entry` по контракту
- * (REMOTE_EXPOSES) и по Р4 ничего не шарит — у ремоута своя копия рантайма.
+ * (REMOTE_EXPOSES) и ничего не шарит — у ремоута своя копия рантайма.
  */
 export const defineRemoteConfig = ({ name, port, kits = [], extend = {} }: RemoteConfig) =>
   defineConfig({
@@ -40,8 +40,8 @@ export const defineRemoteConfig = ({ name, port, kits = [], extend = {} }: Remot
       pluginModuleFederation({
         name,
         exposes: { "./manifest": "./src/manifest.ts", "./entry": "./src/entry.ts" },
-        // Р4: по умолчанию ничего не шарится. MFE_SHARE_CORE=1 — режим эксперимента
-        // (experiments/r4), решение и цифры — в DECISIONS.md.
+        // По умолчанию ничего не шарится. MFE_SHARE_CORE=1 — режим эксперимента
+        // (experiments/r4), решение и цифры — в docs/architecture.md.
         shared:
           process.env.MFE_SHARE_CORE === "1"
             ? { "@rwcjs/core": { singleton: true, requiredVersion: "^3.2.0" } }

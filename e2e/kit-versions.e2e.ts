@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
-/** A4 платформы и K1 кита: две версии @rwcjs/ui на одной странице, в двух реальных ремоутах. */
+/** Две версии @rwcjs/ui на одной странице, в двух реальных ремоутах. */
 
 const overview = async (page: Page) => {
   await page.goto("/");

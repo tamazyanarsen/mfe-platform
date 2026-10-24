@@ -35,7 +35,7 @@ describe("checkBoundaries", () => {
       {
         file: "packages/registry/src/index.ts",
         specifier: "@rwcjs/core",
-        rule: "core package depends on a UI framework (Р6)",
+        rule: "core package depends on a UI framework",
       },
     ]);
   });
@@ -68,7 +68,7 @@ describe("checkBoundaries", () => {
   });
 });
 
-describe("Р5: имя тега строит только кит", () => {
+describe("имя тега строит только кит", () => {
   test("в исходниках платформы нет второго места, где постфикс склеивается с тегом", () => {
     const repo = resolve(import.meta.dir, "..");
     const glob = new Bun.Glob("{packages,apps}/*/src/**/*.ts");

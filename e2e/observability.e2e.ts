@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-/** A6: падение ремоута при отрисовке остаётся внутри его outlet и попадает в буфер событий. */
+/** Падение ремоута при отрисовке остаётся внутри его outlet и попадает в буфер событий. */
 
 type PlatformEvent = {
   type: string;
