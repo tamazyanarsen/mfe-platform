@@ -14,7 +14,8 @@ export type PlatformEventType =
   | "mount:error"
   | "mount:denied"
   | "register:ok"
-  | "register:denied";
+  | "register:denied"
+  | "store:denied";
 
 export interface PlatformEvent {
   readonly type: PlatformEventType;

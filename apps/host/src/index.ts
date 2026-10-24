@@ -12,9 +12,12 @@ import {
   createMemoryTransport,
   createPrefetcher,
   createRouteTable,
+  DEFAULT_STORE_ACCESS,
   defineMfeOutlet,
   type FallbackContext,
+  filterPatch,
   interceptLinks,
+  listenStorePatches,
   type MfeOutletElement,
   type RouteMatch,
 } from "@mfe/host-runtime";
@@ -89,15 +92,33 @@ const outletTag = defineMfeOutlet({ loader, renderFallback: fallback, transport 
 // ---------------------------------------------------------------- общее состояние
 
 // Стор живёт в хосте. Ремоуты получают состояние свойством `platform` своего элемента и
-// просят изменений через шину — без общего рантайма и без привязки к фреймворку.
+// просят изменений событием platform:patch со своего элемента — без общего рантайма и без
+// привязки к фреймворку. Что какой ремоут может менять — storeAccess в конфигурации.
 const store = createStore<PlatformState>({
   session: { userId: "u-1", name: "Анна Иванова" },
   selected: null,
   theme: "light",
   locale: "ru-RU",
 });
+const storeAccess = config.storeAccess ?? DEFAULT_STORE_ACCESS;
+listenStorePatches<PlatformState>({
+  access: storeAccess,
+  outletTag,
+  apply: (patch) => store.set(patch),
+  transport,
+});
+
 const bus = createBus();
-bus.subscribe("store:patch", (patch) => store.set(patch));
+// Просьба через шину анонимна: хост не знает, от кого она, и применяет только общие поля.
+bus.subscribe("store:patch", (patch) => {
+  const { allowed, denied } = filterPatch(storeAccess, null, patch);
+  if (denied.length > 0) {
+    const reason = `store:patch on the bus may not change ${denied.join(", ")}`;
+    console.warn(`[host] ${reason}`);
+    transport.send({ type: "store:denied", time: Date.now(), name: "bus", reason });
+  }
+  store.set(allowed);
+});
 bus.subscribe("account:selected", (selected) => store.set({ selected }));
 
 const outlets = new Set<MfeOutletElement>();

@@ -40,5 +40,8 @@
       "remote": "payments",
       "basename": "/payments"
     }
-  ]
+  ],
+  "storeAccess": {
+    "*": ["selected", "theme", "locale"]
+  }
 }

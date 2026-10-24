@@ -1,4 +1,10 @@
-import { loadJsonConfig, type RemoteEntry, validateRemoteEntries } from "@mfe/host-runtime";
+import {
+  loadJsonConfig,
+  type RemoteEntry,
+  type StoreAccess,
+  validateRemoteEntries,
+  validateStoreAccess,
+} from "@mfe/host-runtime";
 
 /**
  * Конфигурация хоста: какие ремоуты есть, где их MF-манифесты, что в навигации и на обзоре.
@@ -10,6 +16,8 @@ export interface PlatformConfig {
   readonly nav: ReadonlyArray<{ readonly href: string; readonly title: string }>;
   /** Ремоуты на странице обзора; basename — их собственный, ссылки ведут на их страницы. */
   readonly overview: ReadonlyArray<{ readonly remote: string; readonly basename: string }>;
+  /** Какие поля общего стора какой ремоут может менять; по умолчанию — DEFAULT_STORE_ACCESS. */
+  readonly storeAccess?: StoreAccess;
 }
 
 export const CONFIG_URL = "/platform.config.json";
@@ -31,6 +39,7 @@ export const validatePlatformConfig = (value: unknown): string[] => {
   if (!isList(config.overview, ["remote", "basename"])) {
     problems.push("overview must be a list of {remote, basename}");
   }
+  if (config.storeAccess !== undefined) problems.push(...validateStoreAccess(config.storeAccess));
   return problems;
 };
 

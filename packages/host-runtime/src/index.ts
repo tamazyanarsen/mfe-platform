@@ -5,4 +5,5 @@ export * from "./manifests";
 export * from "./outlet";
 export * from "./overrides";
 export * from "./router";
+export * from "./store-access";
 export * from "./transports";

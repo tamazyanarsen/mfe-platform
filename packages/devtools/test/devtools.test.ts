@@ -59,6 +59,19 @@ describe("createDevtools", () => {
     expect(tools.errors().map((error) => error.message)).toEqual(["frozen", "chunk 404"]);
   });
 
+  test("запреты регистрации кита и изменения стора попадают в последние ошибки", () => {
+    const tools = create();
+    tools.transport.send(event("register:denied", "@rwcjs/ui", { reason: "v0-1 is frozen" }));
+    tools.transport.send(event("store:denied", "accounts", { reason: "may not change session" }));
+    tools.transport.send(event("register:ok", "@rwcjs/ui"));
+
+    expect(tools.errors().map(({ name, message }) => `${name}: ${message}`)).toEqual([
+      "accounts: may not change session",
+      "@rwcjs/ui: v0-1 is frozen",
+    ]);
+    expect(tools.remotes()).toEqual([]);
+  });
+
   test("повторное монтирование сбрасывает время и ошибку прошлого раза", () => {
     const tools = create();
     tools.transport.send(event("mount:start", "payments"));
