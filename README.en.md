@@ -26,6 +26,9 @@ separately, teams update versions independently, and the host assembles them int
 The core (`contract`, `host-runtime`, `registry`, `bus`) does not depend on any UI framework —
 this is checked in CI. rwc and React plug in as equal adapters.
 
+How this beats the usual "React host + Module Federation with shared React" setup, and where the
+usual setup is the better deal — [docs/en/comparison.md](docs/en/comparison.md).
+
 ## Extension
 
 The core is extended without a fork through three points: `ObservabilityTransport` (where mount
@@ -100,6 +103,7 @@ Moving an existing Module Federation setup to the contract — [docs/en/migratio
 
 ## Documents
 
+- [docs/en/comparison.md](docs/en/comparison.md) — how the platform differs from the usual "React host + MF" setup: benefits, costs, when to choose what
 - [docs/en/architecture.md](docs/en/architecture.md) — diagrams: packages, the page, mounting, remote interaction
 - [docs/en/contract.md](docs/en/contract.md) — the remote contract
 - [docs/en/development.md](docs/en/development.md) — new remote, tests, override, debug panel

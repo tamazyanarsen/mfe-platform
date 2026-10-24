@@ -26,6 +26,9 @@
 Ядро (`contract`, `host-runtime`, `registry`, `bus`) не зависит ни от одного UI-фреймворка —
 это проверяется в CI. rwc и React подключаются равноправными адаптерами.
 
+Чем это лучше обычной схемы «React-хост + Module Federation с shared React» и где обычная
+схема выгоднее — [docs/comparison.md](docs/comparison.md).
+
 ## Расширение
 
 Ядро расширяется без форка через три точки: `ObservabilityTransport` (куда уходят события
@@ -100,6 +103,7 @@ docs/                 архитектура, контракт, разработ
 
 ## Документы
 
+- [docs/comparison.md](docs/comparison.md) — чем платформа отличается от обычной схемы «React-хост + MF»: плюсы, цена, когда что выбирать
 - [docs/architecture.md](docs/architecture.md) — схемы: пакеты, страница, монтирование, взаимодействие ремоутов
 - [docs/contract.md](docs/contract.md) — контракт ремоута
 - [docs/development.md](docs/development.md) — новый ремоут, тесты, подмена, панель отладки
