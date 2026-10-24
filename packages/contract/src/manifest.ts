@@ -36,6 +36,8 @@ export const REMOTE_EXPOSES = {
 } as const;
 
 const TAG_RE = /^[a-z][a-z0-9._]*-[a-z0-9._-]*$/;
+/** Точный путь "/accounts" или префикс "/accounts/*"; "*" — только в конце, после "/". */
+const ROUTE_RE = /^\/[^*]*$|^\/(?:[^*]*\/)?\*$/;
 
 /**
  * Проверяет форму манифеста. Возвращает список проблем; пустой список — манифест валиден.
@@ -60,6 +62,8 @@ export const validateManifest = (value: unknown): string[] => {
   }
   if (!Array.isArray(manifest.routes) || manifest.routes.some((r) => typeof r !== "string")) {
     problems.push("routes must be an array of strings");
+  } else if (manifest.routes.some((route: string) => !ROUTE_RE.test(route))) {
+    problems.push('routes must be paths starting with "/", wildcard only as a trailing "/*"');
   }
   if (manifest.requires !== undefined) {
     const requires = manifest.requires;

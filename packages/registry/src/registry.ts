@@ -95,22 +95,26 @@ export const createTagRegistry = (): TagRegistry => {
       return { status: "conflict", postfix, reason };
     };
 
-    if (existing && customElements.get(existing.controlTag)) {
-      if (control && customElements.get(existing.controlTag) !== control) {
-        return conflict(
-          `${kit} ${postfix} is already registered by another build (${existing.version}); ` +
-            `share one build of the kit between remotes on the same ${postfix}`,
-        );
-      }
-      existing.consumers.set(consumer, version);
-      emit("register:ok", context, { reused: true, tag: existing.controlTag });
-      return { status: "reused", postfix, tag: existing.controlTag };
+    const reusable = existing && customElements.get(existing.controlTag) ? existing : undefined;
+    if (reusable && control && customElements.get(reusable.controlTag) !== control) {
+      return conflict(
+        `${kit} ${postfix} is already registered by another build (${reusable.version}); ` +
+          `share one build of the kit between remotes on the same ${postfix}`,
+      );
     }
 
+    // Политика решает за каждого потребителя, а не только за первого: иначе запрет
+    // обходится, если набор тегов уже зарегистрировал кто-то другой.
     const decision = decideRegister([...policies], context);
     if (!decision.allow) {
       emit("register:denied", context, { reason: decision.reason });
       return { status: "denied", postfix, reason: decision.reason };
+    }
+
+    if (reusable) {
+      reusable.consumers.set(consumer, version);
+      emit("register:ok", context, { reused: true, tag: reusable.controlTag });
+      return { status: "reused", postfix, tag: reusable.controlTag };
     }
 
     const tag = request.register(postfix);

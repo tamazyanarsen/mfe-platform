@@ -63,6 +63,29 @@ describe("createTagRegistry", () => {
     expect(events[1]?.details).toMatchObject({ reused: true, consumer: "cards" });
   });
 
+  test("политика проверяет и того, кто переиспользует уже зарегистрированный набор", () => {
+    const registry = createTagRegistry();
+    registry.use({
+      beforeRegister: ({ consumer }) =>
+        consumer === "legacy" ? { allow: false, reason: "legacy is frozen" } : { allow: true },
+    });
+    const kit = plainKit("plain-b");
+    const request = {
+      kit: "plain",
+      version: "4.0.0",
+      control: kit.Control,
+      register: kit.register,
+    };
+
+    expect(registry.registerKit({ ...request, consumer: "accounts" }).status).toBe("registered");
+    expect(registry.registerKit({ ...request, consumer: "legacy" })).toEqual({
+      status: "denied",
+      postfix: "v4",
+      reason: "legacy is frozen",
+    });
+    expect([...(registry.records()[0]?.consumers.keys() ?? [])]).toEqual(["accounts"]);
+  });
+
   test("реестр платформы один на страницу, даже если копий пакета несколько", () => {
     expect(getPlatformRegistry()).toBe(getPlatformRegistry());
   });

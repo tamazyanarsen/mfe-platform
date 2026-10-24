@@ -19,9 +19,17 @@ interface RouteEntry extends RouteMatch {
 
 const normalize = (path: string) => (path.length > 1 ? path.replace(/\/+$/, "") : path);
 
+export interface RouteConflict {
+  readonly pattern: string;
+  /** Ремоуты в порядке манифестов; маршрут достаётся первому. */
+  readonly remotes: readonly string[];
+}
+
 export interface RouteTable {
   resolve(path: string): RouteMatch | null;
   readonly entries: readonly RouteMatch[];
+  /** Паттерны, которые заявили несколько ремоутов. */
+  readonly conflicts: readonly RouteConflict[];
 }
 
 export const createRouteTable = (manifests: readonly RemoteManifest[]): RouteTable => {
@@ -32,13 +40,25 @@ export const createRouteTable = (manifests: readonly RemoteManifest[]): RouteTab
       return { remote: manifest.name, basename, pattern, prefix };
     }),
   );
+  const owners = new Map<string, string[]>();
+  for (const { pattern, remote } of entries) {
+    const remotes = owners.get(pattern) ?? [];
+    if (!remotes.includes(remote)) remotes.push(remote);
+    owners.set(pattern, remotes);
+  }
+  const conflicts = [...owners]
+    .filter(([, remotes]) => remotes.length > 1)
+    .map(([pattern, remotes]) => ({ pattern, remotes }));
+
   // Самый длинный префикс побеждает; точное совпадение — раньше префиксного той же длины.
+  // Сортировка устойчивая: при конфликте маршрут остаётся за ремоутом, чей манифест раньше.
   entries.sort(
     (a, b) => b.basename.length - a.basename.length || Number(a.prefix) - Number(b.prefix),
   );
 
   return {
     entries,
+    conflicts,
     resolve(rawPath) {
       const path = normalize(rawPath);
       const entry = entries.find(({ basename, prefix }) =>
@@ -91,7 +111,10 @@ export const createHostRouter = ({
   const navigate = (to: string, { replace = false } = {}) => {
     const url = new URL(to, location.href);
     if (url.origin !== location.origin) {
-      location.assign(url.href);
+      // Наружу — только http(s): `javascript:` и `data:` из события ремоута исполнились бы
+      // в контексте хоста.
+      if (url.protocol === "http:" || url.protocol === "https:") location.assign(url.href);
+      else console.warn(`[mfe] navigation to "${url.protocol}" URL is blocked`);
       return;
     }
     if (url.href === location.href) return;

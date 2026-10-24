@@ -153,8 +153,15 @@ const manifests = (
   return [];
 });
 
+const table = createRouteTable(manifests);
+for (const { pattern, remotes } of table.conflicts) {
+  console.warn(
+    `[host] route "${pattern}" is claimed by ${remotes.join(", ")}; using ${remotes[0]}`,
+  );
+}
+
 const router = createHostRouter({
-  table: createRouteTable(manifests),
+  table,
   onRoute(match, path) {
     for (const link of nav.querySelectorAll("a")) {
       const active =

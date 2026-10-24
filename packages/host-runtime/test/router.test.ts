@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { CONTRACT_VERSION, navigateEvent, type RemoteManifest } from "@mfe/contract";
 import { createHostRouter, createRouteTable, type HostRouter, type RouteMatch } from "../src";
 
@@ -32,6 +32,18 @@ describe("createRouteTable", () => {
   test("префикс не совпадает с соседним именем и чужие пути не находятся", () => {
     expect(table.resolve("/accountsx")).toBeNull();
     expect(table.resolve("/unknown")).toBeNull();
+  });
+
+  test("два ремоута на одном маршруте — конфликт виден, побеждает первый", () => {
+    const conflicting = createRouteTable([
+      manifest("accounts", ["/accounts/*"]),
+      manifest("accounts-next", ["/accounts/*", "/next"]),
+    ]);
+    expect(conflicting.conflicts).toEqual([
+      { pattern: "/accounts/*", remotes: ["accounts", "accounts-next"] },
+    ]);
+    expect(conflicting.resolve("/accounts/1")?.remote).toBe("accounts");
+    expect(table.conflicts).toEqual([]);
   });
 });
 
@@ -106,6 +118,36 @@ describe("createHostRouter", () => {
     r.dispose();
     document.dispatchEvent(navigateEvent("/payments"));
     expect(location.pathname).toBe("/accounts");
+  });
+});
+
+describe("навигация наружу", () => {
+  afterEach(() => history.replaceState(null, "", "/"));
+
+  test.each([
+    ["javascript:alert(1)"],
+    ["data:text/html,<script>alert(1)</script>"],
+    ["vbscript:msgbox(1)"],
+  ])("platform:navigate на %p не исполняется", (to) => {
+    const router = createHostRouter({ table, onRoute: () => {} }).start();
+    const assign = spyOn(location, "assign").mockImplementation(() => {});
+    const warn = spyOn(console, "warn").mockImplementation(() => {});
+    document.dispatchEvent(navigateEvent(to));
+    expect(assign).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+    expect(location.pathname).toBe("/");
+    assign.mockRestore();
+    warn.mockRestore();
+    router.dispose();
+  });
+
+  test("внешний http-адрес открывается полной загрузкой", () => {
+    const router = createHostRouter({ table, onRoute: () => {} }).start();
+    const assign = spyOn(location, "assign").mockImplementation(() => {});
+    router.navigate("https://bank.example/help");
+    expect(assign).toHaveBeenCalledWith("https://bank.example/help");
+    assign.mockRestore();
+    router.dispose();
   });
 });
 

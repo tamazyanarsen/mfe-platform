@@ -146,7 +146,12 @@ export const defineMfeOutlet = (options: OutletOptions, tag = "mfe-outlet"): str
         if (this.#remoteElement) setBasename(this.#remoteElement, next);
         return;
       }
-      if (!this.isConnected) return;
+      if (!this.isConnected) {
+        // Смонтируется при подключении; снятый remote убирает ремоут сразу, иначе при
+        // возвращении в DOM outlet показал бы старый.
+        if (!next && this.#loaded !== null) this.#reset();
+        return;
+      }
       if (next) void this.#mount(next);
       else this.#reset();
     }

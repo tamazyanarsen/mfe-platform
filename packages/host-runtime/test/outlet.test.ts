@@ -215,6 +215,35 @@ describe("<mfe-outlet>", () => {
     expect(slow.registerCalls()).toBe(0);
   });
 
+  test("remote снят, пока outlet вне DOM: вернувшись, outlet пуст, а не показывает старый ремоут", async () => {
+    const remote = fakeRemote("detached");
+    const { loader } = memoryLoader(remote);
+    const { outlet } = await mount({ loader, transport: createMemoryTransport() }, "detached");
+
+    outlet.remove();
+    outlet.removeAttribute("remote");
+    document.body.append(outlet);
+
+    expect(outlet.state).toBe("idle");
+    expect(outlet.remoteElement).toBeNull();
+    expect(outlet.childElementCount).toBe(0);
+  });
+
+  test("outlet перенесли в DOM без смены remote — ремоут не перемонтируется", async () => {
+    const remote = fakeRemote("moved");
+    const { loader, calls } = memoryLoader(remote);
+    const { outlet } = await mount({ loader, transport: createMemoryTransport() }, "moved");
+    const element = outlet.remoteElement;
+
+    const section = document.createElement("section");
+    document.body.append(section);
+    section.append(outlet);
+
+    expect(outlet.state).toBe("ready");
+    expect(outlet.remoteElement).toBe(element);
+    expect(calls).toEqual(["manifest:moved", "module:moved"]);
+  });
+
   test("manifest.extra проносится в события насквозь", async () => {
     const remote = fakeRemote("billing", { extra: { costCenter: "CC-42" } });
     const { loader } = memoryLoader(remote);

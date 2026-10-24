@@ -19,6 +19,19 @@ describe("validateManifest", () => {
     expect(validateManifest({ ...valid, extra: "даже строка" })).toEqual([]);
   });
 
+  test.each([["accounts"], ["/accounts*"], ["/accounts/*/details"], [""]])(
+    "маршрут %p — ошибка: такой паттерн никогда не совпадёт",
+    (route) => {
+      expect(validateManifest({ ...valid, routes: [route] })).toEqual([
+        'routes must be paths starting with "/", wildcard only as a trailing "/*"',
+      ]);
+    },
+  );
+
+  test("пустой список маршрутов допустим: ремоут-виджет без своей страницы", () => {
+    expect(validateManifest({ ...valid, routes: [] })).toEqual([]);
+  });
+
   test("перечисляет все проблемы", () => {
     expect(
       validateManifest({
