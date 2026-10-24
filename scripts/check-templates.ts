@@ -1,10 +1,11 @@
 import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { measureRemote } from "./check-size";
 import { CONFIG_PATH, createRemote, TEMPLATES } from "./create-remote";
 
 /**
  * Шаблоны ремоутов не должны устаревать молча: каждый генерируется в apps/, ставится,
- * проходит свой тест контракта и собирается. После проверки репозиторий возвращается
+ * проходит свой тест контракта, собирается и укладывается в свой бюджет размера. После проверки репозиторий возвращается
  * в исходное состояние, даже если что-то упало.
  */
 const root = join(import.meta.dir, "..");
@@ -25,7 +26,16 @@ try {
   });
   run(["bun", "install"]);
   run(["bun", "test", ...names.map((name) => `apps/mfe-${name}`)]);
-  for (const name of names) run(["bun", "run", "build"], join(root, "apps", `mfe-${name}`));
+  for (const name of names) {
+    const dir = join(root, "apps", `mfe-${name}`);
+    run(["bun", "run", "build"], dir);
+    const size = measureRemote(dir, name);
+    if (!size || size.budgetBytes === undefined || size.gzipBytes > size.budgetBytes) {
+      throw new Error(
+        `${name}: ${((size?.gzipBytes ?? 0) / 1024).toFixed(1)} KB gzip is over its size budget`,
+      );
+    }
+  }
   console.log(`templates ok: ${TEMPLATES.join(", ")}`);
 } catch (error) {
   failed = true;

@@ -20,5 +20,10 @@
     "@mfe/testing": "workspace:*",
     "@module-federation/rsbuild-plugin": "^2.9.2",
     "@rsbuild/core": "^2.2.14"
+  },
+  "mfe": {
+    "sizeBudget": {
+      "gzipKb": 70
+    }
   }
 }
