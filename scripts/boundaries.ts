@@ -6,13 +6,11 @@ import { join, relative } from "node:path";
  *
  * 1. Ядро платформы не зависит ни от одного UI-фреймворка: ни rwc, ни React.
  * 2. Ядро не знает об адаптерах и приложениях — зависимость только в обратную сторону.
- * 3. Ни один открытый пакет не знает о платных: ни импорта, ни упоминания в зависимостях.
  */
 export const CORE_PACKAGES = ["contract", "host-runtime", "registry", "bus"] as const;
 
 const FRAMEWORKS = [/^@rwcjs\//, /^react$/, /^react\//, /^react-dom(\/|$)/];
 const INTERNAL_NON_CORE = [/^@mfe\/adapter-/];
-const PAID = [/^@mfe\/(policy|collector|console|migrate)(\/|$)/];
 
 export interface Violation {
   readonly file: string;
@@ -74,22 +72,12 @@ export const checkBoundaries = (root: string): Violation[] => {
     }
   };
 
-  const paidRule = ["open package depends on a paid package", PAID] as const;
-
   for (const name of listDirs(join(root, "packages"))) {
-    const dir = join(root, "packages", name);
-    if ((CORE_PACKAGES as readonly string[]).includes(name)) {
-      scan(dir, [
-        ["core package depends on a UI framework", FRAMEWORKS],
-        ["core package depends on an adapter", INTERNAL_NON_CORE],
-        paidRule,
-      ]);
-    } else {
-      scan(dir, [paidRule]);
-    }
-  }
-  for (const name of listDirs(join(root, "apps"))) {
-    scan(join(root, "apps", name), [paidRule]);
+    if (!(CORE_PACKAGES as readonly string[]).includes(name)) continue;
+    scan(join(root, "packages", name), [
+      ["core package depends on a UI framework", FRAMEWORKS],
+      ["core package depends on an adapter", INTERNAL_NON_CORE],
+    ]);
   }
   return violations;
 };

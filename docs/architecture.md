@@ -7,8 +7,8 @@
 ## 1. Пакеты и зависимости
 
 Кто кого импортирует на этапе сборки. Стрелки идут только от внешних слоёв к ядру. CI
-(`scripts/check-boundaries.ts`) проверяет три правила: ядро не знает UI-фреймворков, ядро не
-знает адаптеров и приложений, открытые пакеты не знают о платных.
+(`scripts/check-boundaries.ts`) проверяет два правила: ядро не знает UI-фреймворков и не знает
+адаптеров и приложений.
 
 ```mermaid
 flowchart BT
@@ -58,9 +58,6 @@ flowchart BT
   leg --> areact
   leg --> contract
 ```
-
-Платный слой (`@mfe/policy`, `@mfe/collector`, …) в этом графе отсутствует намеренно: он
-подключается снаружи через точки расширения (раздел 7), а не импортом из ядра.
 
 ## 2. Что работает на странице
 
@@ -273,27 +270,29 @@ flowchart LR
 `denied` или `conflict` превращается в исключение из `register()` — outlet показывает
 fallback вместо полуработающего ремоута.
 
-## 7. Точки расширения: открытое ядро и платный слой
+## 7. Точки расширения
+
+Интерфейсы объявлены в `@mfe/contract`. Ядро везёт реализации по умолчанию; свои
+подключаются параметрами, без форка.
 
 ```mermaid
 flowchart LR
-  subgraph open["Открытое ядро"]
+  subgraph core["Ядро"]
     outlet["#lt;mfe-outlet#gt;"]
     reg["Реестр"]
     man["RemoteManifest.extra"]
-    deft["console + memory"]
   end
 
-  subgraph ext["Интерфейсы в @mfe/contract"]
+  subgraph ext["Интерфейсы"]
     OT["ObservabilityTransport.send()"]
     PH["PolicyHook<br/>beforeMount / beforeRegister"]
     EX["extra: Record#lt;string, unknown#gt;"]
   end
 
-  subgraph paid["Платный слой (снаружи, без форка)"]
-    col["Коллектор и панель"]
-    pol["Набор политик + проверка в CI"]
-    gov["Governance-данные: команда, владелец"]
+  subgraph impl["Реализации"]
+    deft["по умолчанию:<br/>console + memory"]
+    nopol["по умолчанию:<br/>политик нет, всё разрешено"]
+    own["свои: приёмник событий,<br/>правила, метаданные"]
   end
 
   outlet --> OT
@@ -302,9 +301,10 @@ flowchart LR
   reg --> PH
   man --> EX
   OT --> deft
-  OT -.-> col
-  PH -.-> pol
-  EX -.-> gov
+  PH --> nopol
+  OT -.-> own
+  PH -.-> own
+  EX -.-> own
 ```
 
 ## 8. Подключение нового ремоута

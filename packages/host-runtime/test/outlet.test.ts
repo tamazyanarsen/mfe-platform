@@ -290,12 +290,12 @@ describe("изоляция ошибок и наблюдаемость", () => {
     expect(ready.timings?.firstFrame).toBeGreaterThanOrEqual(ready.timings?.codeLoad ?? 0);
   });
 
-  test("подменённый транспорт получает те же события — внешний коллектор подключится без форка", async () => {
+  test("подменённый транспорт получает те же события — внешний приёмник подключается без форка", async () => {
     const received: PlatformEvent[] = [];
-    const collector: ObservabilityTransport = { send: (event) => received.push(event) };
+    const external: ObservabilityTransport = { send: (event) => received.push(event) };
     const buffer = createMemoryTransport();
     const { loader } = memoryLoader(crashingRemote("loans"), fakeRemote("deposits"));
-    const options = { loader, transport: combineTransports(buffer, collector) };
+    const options = { loader, transport: combineTransports(buffer, external) };
 
     await mount(options, "loans");
     await mount(options, "deposits");
@@ -308,7 +308,7 @@ describe("изоляция ошибок и наблюдаемость", () => {
   test("падение транспорта не роняет монтирование", async () => {
     const broken: ObservabilityTransport = {
       send() {
-        throw new Error("collector is down");
+        throw new Error("receiver is down");
       },
     };
     const { loader } = memoryLoader(fakeRemote("resilient"));

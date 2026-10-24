@@ -57,14 +57,11 @@ describe("checkBoundaries", () => {
     expect(checkBoundaries(root)).toHaveLength(1);
   });
 
-  test("адаптер может зависеть от rwc, но ни один открытый пакет — от платного", () => {
+  test("адаптер и приложение могут зависеть от фреймворка", () => {
     fixture();
-    file("packages/adapter-rwc/src/index.ts", 'import "@rwcjs/core";\nimport "@mfe/policy";\n');
-    file("apps/host/src/main.ts", 'import { collect } from "@mfe/collector";\n');
-    expect(checkBoundaries(root).map((v) => `${v.file} ${v.specifier}`)).toEqual([
-      "packages/adapter-rwc/src/index.ts @mfe/policy",
-      "apps/host/src/main.ts @mfe/collector",
-    ]);
+    file("packages/adapter-rwc/src/index.ts", 'import "@rwcjs/core";\n');
+    file("apps/host/src/main.ts", 'import { createRoot } from "react-dom/client";\n');
+    expect(checkBoundaries(root)).toEqual([]);
   });
 });
 

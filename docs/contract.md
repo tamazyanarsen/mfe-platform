@@ -92,7 +92,7 @@ useKit({ name: "@rwcjs/ui", version: "0.2.0", consumer: manifest.name, kit: ui, 
 | `ObservabilityTransport` | `defineMfeOutlet({ transport })`, `registry.setTransport()` | куда уходят события |
 | `PolicyHook.beforeMount` | `defineMfeOutlet({ policies })` | запретить монтирование |
 | `PolicyHook.beforeRegister` | `registry.use(policy)` | запретить регистрацию версии кита |
-| `manifest.extra` | манифест ремоута | governance-данные без смены схемы |
+| `manifest.extra` | манифест ремоута | метаданные ремоута (команда, владелец) без смены схемы |
 
 ## Состояния `<mfe-outlet>`
 

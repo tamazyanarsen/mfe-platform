@@ -32,7 +32,7 @@ const fallback = ({ state, remote, message }: FallbackContext): Node => {
 
 registerRemotes(REMOTES.map(({ name, entry }) => ({ name, entry })));
 const loader = createFederationLoader(loadRemote);
-// Наблюдаемость открытой части: консоль и кольцевой буфер в памяти (наружу ничего).
+// Наблюдаемость по умолчанию: консоль и кольцевой буфер в памяти (наружу ничего).
 const events = createMemoryTransport(500);
 const outletTag = defineMfeOutlet({
   loader,

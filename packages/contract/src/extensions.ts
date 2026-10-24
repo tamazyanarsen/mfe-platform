@@ -26,7 +26,7 @@ export interface PlatformEvent {
   readonly version?: string;
   readonly route?: string;
   readonly contractVersion?: number;
-  /** `manifest.extra` как есть: governance-данные потребителя. */
+  /** `manifest.extra` как есть: метаданные потребителя. */
   readonly extra?: Readonly<Record<string, unknown>>;
   /** Длительности в миллисекундах. */
   readonly timings?: Readonly<Record<string, number>>;
