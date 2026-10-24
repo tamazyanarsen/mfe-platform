@@ -70,3 +70,14 @@ describe("decideMount", () => {
     expect(await decideMount(hooks, context)).toEqual({ allow: false, reason: "first" });
   });
 });
+
+describe("validateManifest: необязательные поля", () => {
+  test("version и requires проверяются, если заданы", () => {
+    expect(validateManifest({ ...valid, version: 1 })).toEqual(["version must be a string"]);
+    expect(validateManifest({ ...valid, requires: "@rwcjs/ui" })).toEqual([
+      "requires must map package names to version ranges",
+    ]);
+    const { requires: _requires, extra: _extra, ...minimal } = valid;
+    expect(validateManifest(minimal)).toEqual([]);
+  });
+});

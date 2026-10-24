@@ -58,11 +58,23 @@ const walk = (dir: string): string[] =>
     return statSync(path).isDirectory() ? walk(path) : [path];
   });
 
-const nextPort = (config: HostConfig) => {
-  const ports = config.remotes
-    .map(({ entry }) => (URL.canParse(entry) ? Number(new URL(entry).port) : 0))
-    .filter((port) => port > 0);
-  return Math.max(3000, ...ports) + 1;
+/**
+ * Следующий свободный порт: после портов из конфигурации хоста и из rsbuild-конфигов всех
+ * приложений в apps/ — там есть и ремоуты, которых нет в конфигурации (тестовые, новые).
+ */
+const nextPort = (root: string, config: HostConfig) => {
+  const fromConfig = config.remotes.map(({ entry }) =>
+    URL.canParse(entry) ? Number(new URL(entry).port) : 0,
+  );
+  const appsDir = join(root, "apps");
+  const fromApps = existsSync(appsDir)
+    ? readdirSync(appsDir).map((app) => {
+        const file = join(appsDir, app, "rsbuild.config.ts");
+        const match = existsSync(file) ? /\bport:\s*(\d+)/.exec(readFileSync(file, "utf8")) : null;
+        return match ? Number(match[1]) : 0;
+      })
+    : [];
+  return Math.max(3000, ...fromConfig, ...fromApps) + 1;
 };
 
 export const createRemote = ({
@@ -90,7 +102,7 @@ export const createRemote = ({
   if (config.remotes.some((remote) => remote.name === name)) {
     throw new Error(`remote "${name}" is already in ${CONFIG_PATH}`);
   }
-  const devPort = port ?? nextPort(config);
+  const devPort = port ?? nextPort(root, config);
   const caption = title ?? pascal(name);
 
   const values: Record<string, string> = {

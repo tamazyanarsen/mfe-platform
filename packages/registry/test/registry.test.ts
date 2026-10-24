@@ -90,3 +90,49 @@ describe("createTagRegistry", () => {
     expect(getPlatformRegistry()).toBe(getPlatformRegistry());
   });
 });
+
+describe("createTagRegistry: края", () => {
+  test("кит, который не зарегистрировал контрольный тег, — конфликт, а не учёт", () => {
+    const registry = createTagRegistry();
+    const result = registry.registerKit({
+      kit: "broken",
+      version: "1.0.0",
+      consumer: "accounts",
+      register: () => undefined,
+    });
+    expect(result).toMatchObject({ status: "conflict", postfix: "v1" });
+    expect(registry.records()).toEqual([]);
+  });
+
+  test("отключённая политика больше не запрещает", () => {
+    const registry = createTagRegistry();
+    const kit = plainKit("plain-c");
+    const off = registry.use({ beforeRegister: () => ({ allow: false, reason: "frozen" }) });
+    const request = {
+      kit: "plain",
+      version: "5.0.0",
+      consumer: "accounts",
+      control: kit.Control,
+      register: kit.register,
+    };
+    expect(registry.registerKit(request).status).toBe("denied");
+    off();
+    expect(registry.registerKit(request).status).toBe("registered");
+  });
+
+  test("records() отдаёт копию: учёт снаружи не испортить", () => {
+    const registry = createTagRegistry();
+    const kit = plainKit("plain-d");
+    registry.registerKit({
+      kit: "plain",
+      version: "6.0.0",
+      consumer: "accounts",
+      control: kit.Control,
+      register: kit.register,
+    });
+    const [record] = registry.records();
+    const consumers = record?.consumers as Map<string, string> | undefined;
+    consumers?.set("intruder", "1");
+    expect([...(registry.records()[0]?.consumers.keys() ?? [])]).toEqual(["accounts"]);
+  });
+});

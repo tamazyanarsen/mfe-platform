@@ -54,6 +54,15 @@ describe("createRemote", () => {
     expect(read("apps/mfe-credit_cards/rsbuild.config.ts")).toContain("port: 3003");
   });
 
+  test("порт по умолчанию не занят и ремоутом вне конфигурации хоста", () => {
+    mkdirSync(join(root, "apps/mfe-probe"), { recursive: true });
+    writeFileSync(
+      join(root, "apps/mfe-probe/rsbuild.config.ts"),
+      'export default defineRemoteConfig({ name: "probe", port: 3007 });',
+    );
+    expect(createRemote({ root, name: "cards" }).port).toBe(3008);
+  });
+
   test("ремоут и пункт навигации попадают в конфигурацию хоста", () => {
     createRemote({ root, name: "cards", port: 3010, title: "Карты" });
     expect(config().remotes.at(-1)).toEqual({
@@ -77,5 +86,25 @@ describe("createRemote", () => {
     createRemote({ root, name: "cards" });
     expect(() => createRemote({ root, name: "cards" })).toThrow("already exists");
     expect(config().remotes).toHaveLength(3);
+  });
+});
+
+describe("create:remote из командной строки", () => {
+  const cli = (...args: string[]) =>
+    Bun.spawnSync(["bun", "run", join(import.meta.dir, "create-remote.ts"), ...args], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+
+  test("без имени — подсказка и код ошибки", () => {
+    const result = cli();
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr.toString()).toContain("usage: bun run create:remote <name>");
+  });
+
+  test("кривое имя — ошибка без изменений в репозитории", () => {
+    const result = cli("Bad-Name");
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr.toString()).toContain("must be a lowercase identifier");
   });
 });

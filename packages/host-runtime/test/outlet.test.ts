@@ -382,3 +382,34 @@ describe("изоляция ошибок и наблюдаемость", () => {
     expect(state).toBe("ready");
   });
 });
+
+describe("<mfe-outlet>: basename", () => {
+  test("смена basename у смонтированного ремоута доходит до его элемента без перемонтирования", async () => {
+    const remote = fakeRemote("based");
+    const { loader, calls } = memoryLoader(remote);
+    const tag = defineMfeOutlet(
+      { loader, transport: createMemoryTransport() },
+      uniqueTag("test-outlet"),
+    );
+    const outlet = document.createElement(tag) as MfeOutletElement;
+    outlet.basename = "/accounts";
+    outlet.remote = "based";
+    document.body.append(outlet);
+    await whenOutletSettles(outlet);
+    expect(outlet.remoteElement?.getAttribute("basename")).toBe("/accounts");
+
+    outlet.basename = "/cards";
+    expect(outlet.basename).toBe("/cards");
+    expect(outlet.remoteElement?.getAttribute("basename")).toBe("/cards");
+    outlet.removeAttribute("basename");
+    expect(outlet.remoteElement?.hasAttribute("basename")).toBe(false);
+    expect(calls).toEqual(["manifest:based", "module:based"]);
+  });
+
+  test("defineMfeOutlet с занятым тегом возвращает его, не регистрируя второй раз", () => {
+    const { loader } = memoryLoader();
+    const tag = uniqueTag("test-outlet");
+    expect(defineMfeOutlet({ loader }, tag)).toBe(tag);
+    expect(defineMfeOutlet({ loader }, tag)).toBe(tag);
+  });
+});
