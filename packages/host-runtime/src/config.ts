@@ -12,6 +12,10 @@ export interface RemoteEntry {
 // Имя ремоута — имя контейнера Module Federation, то есть JS-идентификатор.
 const NAME_RE = /^[A-Za-z_$][\w$]*$/;
 
+/** Подходит ли строка как имя ремоута (оно же имя контейнера Module Federation). */
+export const isRemoteName = (value: unknown): value is string =>
+  typeof value === "string" && NAME_RE.test(value);
+
 /** Проверяет список ремоутов. Возвращает проблемы; пустой список — всё в порядке. */
 export const validateRemoteEntries = (value: unknown): string[] => {
   if (!Array.isArray(value)) return ["remotes must be an array"];
@@ -24,7 +28,7 @@ export const validateRemoteEntries = (value: unknown): string[] => {
       return;
     }
     const { name, entry } = item as Record<string, unknown>;
-    if (typeof name !== "string" || !NAME_RE.test(name)) {
+    if (!isRemoteName(name)) {
       problems.push(`${at}.name must be an identifier`);
     } else if (seen.has(name)) {
       problems.push(`${at}.name "${name}" is duplicated`);

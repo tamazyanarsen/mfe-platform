@@ -89,7 +89,7 @@ describe("applyRemoteOverrides", () => {
     });
     expect(first.remotes[0]).toEqual(remotes[0] as RemoteEntry);
     expect(first.overridden).toEqual([
-      { name: "payments", entry: "http://localhost:3002/mf-manifest.json" },
+      { name: "payments", entry: "http://localhost:3002/mf-manifest.json", added: false },
     ]);
 
     // Следующая загрузка страницы без параметра помнит подмену.
@@ -114,13 +114,43 @@ describe("applyRemoteOverrides", () => {
     expect(warn).toHaveBeenCalled();
   });
 
-  test("неизвестный ремоут и кривой параметр игнорируются", () => {
+  test("ремоут, которого нет в конфигурации, добавляется в конец и запоминается", () => {
+    const storage = memoryStorage();
+    const search = "?mfe-override=cards=http://localhost:3009/mf-manifest.json";
+    const result = applyRemoteOverrides(remotes, { search, storage });
+
+    expect(result.remotes).toEqual([
+      ...remotes,
+      { name: "cards", entry: "http://localhost:3009/mf-manifest.json" },
+    ]);
+    expect(result.overridden).toEqual([
+      { name: "cards", entry: "http://localhost:3009/mf-manifest.json", added: true },
+    ]);
+    expect(applyRemoteOverrides(remotes, { search: "", storage }).remotes).toHaveLength(3);
+  });
+
+  test("новый ремоут: только локальный адрес и имя-идентификатор", () => {
     const result = applyRemoteOverrides(remotes, {
-      search: "?mfe-override=cards=http://localhost:3009/mf-manifest.json&mfe-override=payments",
+      search: [
+        "?mfe-override=cards=https://evil.example/mf-manifest.json",
+        "mfe-override=credit-cards=http://localhost:3009/mf-manifest.json",
+        "mfe-override=payments",
+      ].join("&"),
       storage: memoryStorage(),
     });
+    expect(result.remotes).toEqual(remotes);
     expect(result.overridden).toEqual([]);
-    expect(warn).toHaveBeenCalledTimes(2);
+    expect(warn).toHaveBeenCalledTimes(3);
+  });
+
+  test("allowNew: false — подменяются только ремоуты из конфигурации", () => {
+    const result = applyRemoteOverrides(remotes, {
+      search: "?mfe-override=cards=http://localhost:3009/mf-manifest.json",
+      storage: memoryStorage(),
+      allowNew: false,
+    });
+    expect(result.remotes).toEqual(remotes);
+    expect(warn).toHaveBeenCalledTimes(1);
   });
 
   test("свой список разрешённых адресов", () => {
@@ -130,7 +160,11 @@ describe("applyRemoteOverrides", () => {
       allow: (url) => url.hostname === "stage.bank.example",
     });
     expect(result.overridden).toEqual([
-      { name: "accounts", entry: "https://stage.bank.example/accounts/mf-manifest.json" },
+      {
+        name: "accounts",
+        entry: "https://stage.bank.example/accounts/mf-manifest.json",
+        added: false,
+      },
     ]);
   });
 

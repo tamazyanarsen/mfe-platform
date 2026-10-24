@@ -75,7 +75,10 @@ describe("createDevtools", () => {
 
   test("панель показывает ремоуты, киты, подмены и ошибки и обновляется по событиям", async () => {
     const tools = create({
-      overrides: [{ name: "payments", entry: "http://localhost:3002/mf-manifest.json" }],
+      overrides: [
+        { name: "payments", entry: "http://localhost:3002/mf-manifest.json" },
+        { name: "cards", entry: "http://localhost:3009/mf-manifest.json", added: true },
+      ],
     });
     tools.open();
     expect(tools.isOpen).toBe(true);
@@ -83,6 +86,7 @@ describe("createDevtools", () => {
     expect(panelText(tools)).toContain("v0-2");
     expect(panelText(tools)).toContain("accounts@0.2.0");
     expect(panelText(tools)).toContain("http://localhost:3002/mf-manifest.json");
+    expect(panelText(tools)).toContain("cards (new)");
 
     tools.transport.send(event("mount:start", "accounts"));
     tools.transport.send(event("mount:error", "accounts", { error: { message: "<img onerror>" } }));

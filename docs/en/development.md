@@ -88,7 +88,21 @@ https://platform.bank.example/payments?mfe-override=payments=http://localhost:30
 An override loads foreign code onto the page, so only addresses of this machine are allowed:
 `localhost`, `127.0.0.1`, `[::1]`. Others are discarded with a warning in the console.
 The host can set its own list: `applyRemoteOverrides(remotes, { allow: (url) => ... })`.
-Only a remote that is already in the configuration can be overridden.
+### A new remote that is not in the configuration yet
+
+An override with an unknown name adds the remote: a new remote is developed right on the staging
+environment or in production, before it is added to `platform.config.json`.
+
+```
+https://platform.bank.example/?mfe-override=cards=http://localhost:3004/mf-manifest.json
+```
+
+- The host loads the new remote's manifest together with the others, and its routes
+  (`/cards`, `/cards/*`) work as usual.
+- A temporary `cards (override)` item appears in the navigation and leads to the remote's first
+  route; the override badge marks it with a plus: `override: +cards`.
+- The same restrictions apply: local addresses only, the name must be a JS identifier.
+- A host that does not need this turns it off: `applyRemoteOverrides(remotes, { allowNew: false })`.
 
 ## Debug panel: `@mfe/devtools`
 

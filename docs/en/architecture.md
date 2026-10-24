@@ -417,6 +417,9 @@ with the parameter would become a way to run someone else's code in the host's c
 only `localhost`, `127.0.0.1` and `[::1]` are allowed: an override is useful to a developer on their
 machine and useless to an attacker. The host can extend the list (for example, with staging environment URLs).
 
+For the same reason an override may also add a remote that is not in the configuration: the new remote
+still loads only from the local machine. A host that does not need this passes `allowNew: false`.
+
 ### Link interception
 
 The host intercepts clicks on `<a>` on `document`, after the remotes' handlers. If a remote's router

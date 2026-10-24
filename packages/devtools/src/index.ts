@@ -41,7 +41,12 @@ export interface DevtoolsOptions {
   /** Откуда брать учёт китов. По умолчанию — реестр платформы на странице. */
   readonly registry?: { records(): KitRecord[] };
   /** Действующие подмены адресов ремоутов — показываются отдельным блоком. */
-  readonly overrides?: ReadonlyArray<{ readonly name: string; readonly entry: string }>;
+  readonly overrides?: ReadonlyArray<{
+    readonly name: string;
+    readonly entry: string;
+    /** Ремоута нет в конфигурации — подмена его добавила. */
+    readonly added?: boolean;
+  }>;
   /** Сочетание клавиш для открытия; `null` — без сочетания. По умолчанию Alt+Shift+D. */
   readonly hotkey?: ((event: KeyboardEvent) => boolean) | null;
   /** Тег элемента панели. */
@@ -245,7 +250,10 @@ export const createDevtools = ({
               "Overrides",
               table(
                 ["remote", "entry"],
-                overrides.map(({ name, entry }) => [text(name), text(entry)]),
+                overrides.map(({ name, entry, added }) => [
+                  text(added ? `${name} (new)` : name),
+                  text(entry),
+                ]),
               ),
               "",
             ),

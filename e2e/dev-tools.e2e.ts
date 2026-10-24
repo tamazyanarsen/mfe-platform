@@ -52,6 +52,29 @@ test.describe("подмена ремоута", () => {
     await expect(page.getByTestId("override-badge")).toHaveCount(0);
   });
 
+  test("ремоут, которого нет в конфигурации, подключается подменой", async ({ page }) => {
+    // Конфигурация без legacy: как будто ремоут ещё не внесли, а он уже запущен локально.
+    await page.route("**/platform.config.json", async (route) => {
+      const config = await (await route.fetch()).json();
+      config.remotes = config.remotes.filter(
+        (remote: { name: string }) => remote.name !== "legacy",
+      );
+      config.nav = config.nav.filter((item: { href: string }) => item.href !== "/legacy");
+      await route.fulfill({ json: config });
+    });
+
+    await page.goto("/legacy");
+    await expect(page.getByTestId("not-found")).toBeVisible();
+
+    await page.goto(
+      `/accounts?mfe-override=${encodeURIComponent("legacy=http://localhost:3003/mf-manifest.json")}`,
+    );
+    await expect(page.getByTestId("override-badge")).toHaveText("override: +legacy");
+    await shellNav(page).getByRole("link", { name: "legacy (override)" }).click();
+    await expect(page).toHaveURL(/\/legacy$/);
+    await expect(page.getByTestId("legacy-stack")).toHaveText("Ремоут на React");
+  });
+
   test("чужой адрес не подменяет ремоут", async ({ page }) => {
     const foreign: string[] = [];
     page.on("request", (request) => {

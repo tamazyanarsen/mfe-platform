@@ -1,4 +1,4 @@
-import type { RemoteEntry } from "./config";
+import { isRemoteName, type RemoteEntry } from "./config";
 
 /**
  * Подмена адреса ремоута для разработки: открыть стенд или прод и подставить свой локальный
@@ -9,6 +9,9 @@ import type { RemoteEntry } from "./config";
  *
  * Параметр можно повторять. Подмены запоминаются в sessionStorage и живут, пока открыта
  * вкладка, — внутренняя навигация параметр не сохраняет.
+ *
+ * Ремоут, которого ещё нет в конфигурации, подмена добавляет: так новый ремоут
+ * разрабатывают прямо в стенде, до того как его внесли в конфигурацию.
  *
  * Подмена грузит чужой код на страницу, поэтому по умолчанию разрешены только адреса на
  * этой машине (localhost, 127.0.0.1, [::1]). Остальные отбрасываются с предупреждением.
@@ -25,12 +28,20 @@ export interface OverrideOptions {
   readonly storage?: OverrideStorage | null;
   /** Какие адреса разрешены. По умолчанию — только локальная машина. */
   readonly allow?: (url: URL) => boolean;
+  /** Разрешить добавлять ремоуты, которых нет в конфигурации. По умолчанию — да. */
+  readonly allowNew?: boolean;
+}
+
+export interface OverrideEntry extends RemoteEntry {
+  /** Ремоута не было в конфигурации — подмена его добавила. */
+  readonly added: boolean;
 }
 
 export interface OverrideResult {
+  /** Конфигурация с подменами; добавленные ремоуты — в конце. */
   readonly remotes: readonly RemoteEntry[];
   /** Применённые подмены — их стоит показать, чтобы разработчик не забыл о них. */
-  readonly overridden: readonly RemoteEntry[];
+  readonly overridden: readonly OverrideEntry[];
 }
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
@@ -71,6 +82,7 @@ export const applyRemoteOverrides = (
     search = globalThis.location?.search ?? "",
     storage = defaultStorage(),
     allow = allowLocalhost,
+    allowNew = true,
   }: OverrideOptions = {},
 ): OverrideResult => {
   const known = new Set(remotes.map(({ name }) => name));
@@ -87,8 +99,6 @@ export const applyRemoteOverrides = (
     const entry = param.slice(split + 1);
     if (split < 1 || !entry) {
       console.warn(`[mfe] override "${param}" must look like name=url`);
-    } else if (!known.has(name)) {
-      console.warn(`[mfe] override for unknown remote "${name}" is ignored`);
     } else {
       requested[name] = entry;
     }
@@ -96,19 +106,37 @@ export const applyRemoteOverrides = (
 
   const accepted: Record<string, string> = {};
   for (const [name, entry] of Object.entries(requested)) {
-    if (!known.has(name) || typeof entry !== "string") continue;
+    if (typeof entry !== "string") continue;
+    if (!known.has(name)) {
+      if (!allowNew) {
+        console.warn(`[mfe] override for unknown remote "${name}" is ignored`);
+        continue;
+      }
+      if (!isRemoteName(name)) {
+        console.warn(`[mfe] override name "${name}" must be an identifier`);
+        continue;
+      }
+    }
     const url = URL.canParse(entry) ? new URL(entry) : null;
     if (url && allow(url)) accepted[name] = url.href;
     else console.warn(`[mfe] override ${name}=${entry} is not allowed`);
   }
   writeStored(storage, accepted);
 
+  const added = Object.keys(accepted).filter((name) => !known.has(name));
   return {
-    remotes: remotes.map((remote) =>
-      accepted[remote.name]
-        ? { name: remote.name, entry: accepted[remote.name] as string }
-        : remote,
-    ),
-    overridden: Object.entries(accepted).map(([name, entry]) => ({ name, entry })),
+    remotes: [
+      ...remotes.map((remote) =>
+        accepted[remote.name]
+          ? { name: remote.name, entry: accepted[remote.name] as string }
+          : remote,
+      ),
+      ...added.map((name) => ({ name, entry: accepted[name] as string })),
+    ],
+    overridden: Object.entries(accepted).map(([name, entry]) => ({
+      name,
+      entry,
+      added: !known.has(name),
+    })),
   };
 };

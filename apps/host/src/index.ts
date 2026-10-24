@@ -156,7 +156,9 @@ if (overridden.length > 0) {
   const badge = document.createElement("span");
   badge.className = "override-badge";
   badge.dataset.testid = "override-badge";
-  badge.textContent = `override: ${overridden.map(({ name }) => name).join(", ")}`;
+  badge.textContent = `override: ${overridden
+    .map(({ name, added }) => (added ? `+${name}` : name))
+    .join(", ")}`;
   badge.title = overridden.map(({ name, entry }) => `${name} → ${entry}`).join("\n");
   header.append(badge);
 }
@@ -226,6 +228,18 @@ const manifests = (
 });
 
 const table = createRouteTable(manifests);
+
+// Ремоуту, добавленному подменой, нет места в навигации из конфигурации: временный пункт
+// ведёт на его первый маршрут.
+for (const { name } of overridden.filter(({ added }) => added)) {
+  const route = table.entries.find((entry) => entry.remote === name);
+  if (!route) continue;
+  const link = document.createElement("a");
+  link.href = route.basename;
+  link.textContent = `${name} (override)`;
+  link.dataset.override = "";
+  nav.append(link);
+}
 for (const { pattern, remotes: claimed } of table.conflicts) {
   console.warn(
     `[host] route "${pattern}" is claimed by ${claimed.join(", ")}; using ${claimed[0]}`,
