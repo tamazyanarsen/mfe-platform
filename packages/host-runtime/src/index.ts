@@ -1,6 +1,7 @@
 export * from "./config";
 export * from "./links";
 export * from "./loader";
+export * from "./manifests";
 export * from "./outlet";
 export * from "./overrides";
 export * from "./router";

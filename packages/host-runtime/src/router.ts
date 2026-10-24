@@ -88,15 +88,21 @@ export interface HostRouter {
    */
   start(): HostRouter;
   navigate(to: string, options?: { replace?: boolean }): void;
+  /**
+   * Подменяет таблицу маршрутов — например, когда появился манифест ремоута, недоступного
+   * при старте, — и сообщает текущий маршрут заново, если роутер запущен.
+   */
+  replaceTable(table: RouteTable): void;
   readonly current: RouteMatch | null;
   dispose(): void;
 }
 
 export const createHostRouter = ({
-  table,
+  table: initialTable,
   onRoute,
   eventTarget = document,
 }: HostRouterOptions): HostRouter => {
+  let table = initialTable;
   let current: RouteMatch | null = null;
 
   const sync = () => {
@@ -178,6 +184,10 @@ export const createHostRouter = ({
       return router;
     },
     navigate,
+    replaceTable(next) {
+      table = next;
+      if (started) sync();
+    },
     get current() {
       return current;
     },

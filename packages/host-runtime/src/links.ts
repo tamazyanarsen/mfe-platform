@@ -10,12 +10,14 @@ export const createPrefetcher = ({
   table,
   loader,
 }: {
-  table: RouteTable;
+  /** Таблица маршрутов или функция, отдающая текущую, если таблица меняется. */
+  table: RouteTable | (() => RouteTable);
   loader: RemoteLoader;
 }) => {
   const started = new Set<string>();
+  const current = typeof table === "function" ? table : () => table;
   return (path: string): Promise<void> => {
-    const remote = table.resolve(path)?.remote;
+    const remote = current().resolve(path)?.remote;
     if (!remote || started.has(remote)) return Promise.resolve();
     started.add(remote);
     return loader.loadModule(remote).then(

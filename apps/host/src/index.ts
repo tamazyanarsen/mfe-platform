@@ -1,11 +1,6 @@
 import "./styles.css";
 import { createBus, createStore } from "@mfe/bus";
-import {
-  PLATFORM_PROP,
-  type PlatformState,
-  type RemoteManifest,
-  validateManifest,
-} from "@mfe/contract";
+import { PLATFORM_PROP, type PlatformState } from "@mfe/contract";
 import { createDevtools } from "@mfe/devtools";
 import {
   applyRemoteOverrides,
@@ -13,6 +8,7 @@ import {
   consoleTransport,
   createFederationLoader,
   createHostRouter,
+  createManifestSet,
   createMemoryTransport,
   createPrefetcher,
   createRouteTable,
@@ -210,41 +206,45 @@ const show = (page: Page) => {
 // ---------------------------------------------------------------- маршруты
 
 // Манифесты грузятся заранее, код ремоутов — при первом попадании на их маршрут (или при
-// наведении на ссылку). Недоступный или кривой манифест не ломает остальные маршруты.
-const manifests = (
-  await Promise.allSettled(remotes.map(({ name }) => loader.loadManifest(name)))
-).flatMap((result, index): RemoteManifest[] => {
-  const name = remotes[index]?.name;
-  if (result.status === "rejected") {
-    console.error(`[host] manifest of "${name}" is unavailable`, result.reason);
-    return [];
-  }
-  const problems = validateManifest(result.value);
-  if (problems.length > 0) {
-    console.error(`[host] manifest of "${name}" is invalid: ${problems.join("; ")}`);
-    return [];
-  }
-  return [result.value];
+// наведении на ссылку). Недоступный или кривой манифест не ломает остальные маршруты, а
+// недоступный при старте ремоут догружается, когда пользователь идёт на неизвестный путь.
+const manifests = createManifestSet({
+  loader,
+  names: remotes.map(({ name }) => name),
+  onError: (name, error) => console.error(`[host] manifest of "${name}" is unavailable`, error),
 });
+await manifests.load();
 
-const table = createRouteTable(manifests);
+const overrideLinks = new Set<string>();
+const buildTable = () => {
+  const next = createRouteTable(manifests.manifests());
+  for (const { pattern, remotes: claimed } of next.conflicts) {
+    console.warn(
+      `[host] route "${pattern}" is claimed by ${claimed.join(", ")}; using ${claimed[0]}`,
+    );
+  }
+  // Ремоуту, добавленному подменой, нет места в навигации из конфигурации: временный пункт
+  // ведёт на его первый маршрут.
+  const pending = overridden.filter((entry) => entry.added && !overrideLinks.has(entry.name));
+  for (const { name } of pending) {
+    const route = next.entries.find((entry) => entry.remote === name);
+    if (!route) continue;
+    const link = document.createElement("a");
+    link.href = route.basename;
+    link.textContent = `${name} (override)`;
+    link.dataset.override = "";
+    nav.append(link);
+    overrideLinks.add(name);
+  }
+  return next;
+};
+let table = buildTable();
 
-// Ремоуту, добавленному подменой, нет места в навигации из конфигурации: временный пункт
-// ведёт на его первый маршрут.
-for (const { name } of overridden.filter(({ added }) => added)) {
-  const route = table.entries.find((entry) => entry.remote === name);
-  if (!route) continue;
-  const link = document.createElement("a");
-  link.href = route.basename;
-  link.textContent = `${name} (override)`;
-  link.dataset.override = "";
-  nav.append(link);
-}
-for (const { pattern, remotes: claimed } of table.conflicts) {
-  console.warn(
-    `[host] route "${pattern}" is claimed by ${claimed.join(", ")}; using ${claimed[0]}`,
-  );
-}
+const retryMissingRemotes = async () => {
+  if (!(await manifests.retryFailed())) return;
+  table = buildTable();
+  router.replaceTable(table);
+};
 
 const router = createHostRouter({
   table,
@@ -264,11 +264,12 @@ const router = createHostRouter({
           ? { kind: "remote", match }
           : { kind: "not-found" },
     );
+    if (!match && path !== "/") void retryMissingRemotes();
   },
 });
 
 // Обычные ссылки хоста и ремоутов — через роутер, без перезагрузки; наведение на ссылку
 // заранее загружает код ремоута.
-interceptLinks({ router, prefetch: createPrefetcher({ table, loader }) });
+interceptLinks({ router, prefetch: createPrefetcher({ table: () => table, loader }) });
 
 router.start();
