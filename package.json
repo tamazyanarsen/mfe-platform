@@ -19,7 +19,8 @@
     "check:boundaries": "bun run scripts/check-boundaries.ts",
     "ci": "bun run check:boundaries && bun run lint && bun run typecheck && bun run test && bun run build && bun run check:size",
     "check:templates": "bun run scripts/check-templates.ts",
-    "check:size": "bun run scripts/check-size.ts"
+    "check:size": "bun run scripts/check-size.ts",
+    "test:e2e:prod": "bun run build && playwright test -c playwright.prod.config.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",

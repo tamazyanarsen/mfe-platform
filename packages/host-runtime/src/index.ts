@@ -1,4 +1,5 @@
 export * from "./config";
+export * from "./integrity";
 export * from "./links";
 export * from "./loader";
 export * from "./manifests";

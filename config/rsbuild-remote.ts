@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { pluginModuleFederation } from "@module-federation/rsbuild-plugin";
 import { defineConfig, type RsbuildConfig } from "@rsbuild/core";
+import { pluginIntegrity } from "./integrity";
 
 export interface RemoteConfig {
   /** Имя контейнера MF; совпадает с `manifest.name`. */
@@ -48,6 +49,7 @@ export const defineRemoteConfig = ({ name, port, kits = [], extend = {} }: Remot
             : {},
         dts: false,
       }),
+      pluginIntegrity(),
       ...(extend.plugins ?? []),
     ],
     // Одна копия rwc внутри ремоута: адаптеры платформы и киты берут core ремоута, а не
@@ -64,4 +66,7 @@ export const defineRemoteConfig = ({ name, port, kits = [], extend = {} }: Remot
     dev: { assetPrefix: `http://localhost:${port}/` },
     output: { assetPrefix: `http://localhost:${port}/` },
     html: { title: `${name} (standalone)` },
+    // SRI для чанков в production-сборке: remoteEntry проверяет хеш каждого чанка, который
+    // грузит. Сам remoteEntry закрывает pluginIntegrity (config/integrity.ts).
+    security: { ...extend.security, sri: { enable: "auto", algorithm: "sha384" } },
   });

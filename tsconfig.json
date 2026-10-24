@@ -9,6 +9,8 @@
     "scripts",
     "experiments",
     "e2e",
+    "e2e-prod",
+    "playwright.prod.config.ts",
     "playwright.config.ts"
   ],
   "compilerOptions": {

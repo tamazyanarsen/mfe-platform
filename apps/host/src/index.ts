@@ -8,6 +8,7 @@ import {
   consoleTransport,
   createFederationLoader,
   createHostRouter,
+  createIntegrityPlugin,
   createManifestSet,
   createMemoryTransport,
   createPrefetcher,
@@ -22,7 +23,7 @@ import {
   type RouteMatch,
 } from "@mfe/host-runtime";
 import { getPlatformRegistry } from "@mfe/registry";
-import { loadRemote, registerRemotes } from "@module-federation/enhanced/runtime";
+import { loadRemote, registerPlugins, registerRemotes } from "@module-federation/enhanced/runtime";
 import { loadPlatformConfig, type PlatformConfig } from "./remotes";
 
 // ---------------------------------------------------------------- конфигурация
@@ -85,6 +86,16 @@ const transport = combineTransports(
   ...(devtools ? [devtools.transport] : []),
 );
 
+// Ремоуты с integrity в конфигурации проверяются: манифест, remoteEntry и их чанки.
+registerPlugins([
+  createIntegrityPlugin({
+    remotes,
+    onViolation: (remote, reason) => {
+      console.error(`[host] integrity: ${remote}: ${reason}`);
+      transport.send({ type: "integrity:denied", time: Date.now(), name: remote, reason });
+    },
+  }),
+]);
 registerRemotes(remotes.map(({ name, entry }) => ({ name, entry })));
 const loader = createFederationLoader(loadRemote);
 const outletTag = defineMfeOutlet({ loader, renderFallback: fallback, transport });

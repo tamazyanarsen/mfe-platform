@@ -1,3 +1,5 @@
+import { isIntegrity } from "./integrity";
+
 /**
  * Где хост берёт ремоуты. Конфигурация читается при запуске, а не при сборке: новый ремоут
  * или новый адрес — это выкладка JSON-файла, без пересборки хоста.
@@ -7,6 +9,11 @@ export interface RemoteEntry {
   readonly name: string;
   /** Адрес `mf-manifest.json` ремоута. */
   readonly entry: string;
+  /**
+   * SRI-хеш `mf-manifest.json` (`sha384-…`, из `mf-manifest.json.integrity` сборки). Если
+   * задан, хост проверяет манифест, remoteEntry и чанки ремоута — см. createIntegrityPlugin.
+   */
+  readonly integrity?: string;
 }
 
 // Имя ремоута — имя контейнера Module Federation, то есть JS-идентификатор.
@@ -27,7 +34,7 @@ export const validateRemoteEntries = (value: unknown): string[] => {
       problems.push(`${at} must be an object`);
       return;
     }
-    const { name, entry } = item as Record<string, unknown>;
+    const { name, entry, integrity } = item as Record<string, unknown>;
     if (!isRemoteName(name)) {
       problems.push(`${at}.name must be an identifier`);
     } else if (seen.has(name)) {
@@ -37,6 +44,9 @@ export const validateRemoteEntries = (value: unknown): string[] => {
     }
     if (typeof entry !== "string" || !URL.canParse(entry, "http://localhost/")) {
       problems.push(`${at}.entry must be a URL`);
+    }
+    if (integrity !== undefined && !isIntegrity(integrity)) {
+      problems.push(`${at}.integrity must be an SRI hash like "sha384-…"`);
     }
   });
   return problems;

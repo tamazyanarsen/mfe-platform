@@ -47,9 +47,15 @@ export const createManifestSet = ({
     let added = false;
     results.forEach((result, index) => {
       const name = batch[index] as string;
-      if (result.status === "rejected") return onError(name, result.reason);
+      if (result.status === "rejected") {
+        onError(name, result.reason);
+        return;
+      }
       const problems = validateManifest(result.value);
-      if (problems.length > 0) return onError(name, new Error(problems.join("; ")));
+      if (problems.length > 0) {
+        onError(name, new Error(problems.join("; ")));
+        return;
+      }
       loaded.set(name, result.value);
       added = true;
     });

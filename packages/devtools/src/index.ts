@@ -190,6 +190,7 @@ export const createDevtools = ({
       }
       case "register:denied":
       case "store:denied":
+      case "integrity:denied":
         errors.unshift({ time: event.time, name: event.name, message: event.reason ?? "denied" });
         errors.length = Math.min(errors.length, MAX_ERRORS);
         return;
