@@ -111,7 +111,8 @@ debug panel shows this right on the page.
 ### Bank network requirements
 
 The platform core makes no network requests other than loading code and configuration from your
-addresses. Navigation to other origins is allowed only over `http(s)`. The development override
+addresses. Remote code is checked against a chain of hashes from the host configuration: a manifest,
+remoteEntry or chunk replaced on the CDN is not executed. Navigation to other origins is allowed only over `http(s)`. The development override
 works only with local machine addresses. This does not replace an audit, but it removes the typical
 security team questions about a front-end runtime.
 
@@ -129,15 +130,18 @@ security team questions about a front-end runtime.
 | Shared state | Context / Redux, shared library versions | `platform` property and a typed bus |
 | Observability | do it yourself | mount events, kit version tracking, panel |
 | Local development against staging | usually not provided | `?mfe-override`, including for a new remote |
+| Remote code integrity | do it yourself | a chain of hashes from the host configuration to every chunk |
+| Who can change shared state | anyone with access to the store | per-remote permissions in the host configuration |
+| Remote size | do it yourself | a budget for each remote in CI |
 
 ## Where the usual setup is better
 
 The platform is not free. An honest account of what it costs:
 
-- **Size.** Every remote ships its own framework. For React that is about 218 KB (69 KB gzip) per
-  React remote on the page; with a shared singleton, React loads once. With five React remotes on
-  one page at the same time, the difference is noticeable. The Module Federation runtime (about
-  118 KB, 33 KB gzip per container) is present in both setups.
+- **Size.** React is not shared between remotes: about 218 KB (69 KB gzip) per React remote on
+  the page, whereas with a shared singleton React loads once. With five React remotes on one page
+  at the same time, the difference is noticeable. The Module Federation runtime and the UI kit of
+  one line are shared in the platform, so this applies only to the framework itself.
 - **No shared context.** React Context, shared hooks and providers do not cross the remote
   boundary. Everything shared goes through the `platform` property and the bus, which means more
   explicit code.

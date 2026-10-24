@@ -165,10 +165,11 @@ sequenceDiagram
   H->>B: fetch /platform.config.json (no-cache)
   Note over H: File missing or invalid →<br/>error message instead of a blank page
   H->>H: applyRemoteOverrides(remotes) — ?mfe-override
-  H->>L: registerRemotes(remotes)
+  H->>L: registerPlugins(createIntegrityPlugin) + registerRemotes(remotes)
   par for each remote
     H->>L: loadManifest(name)
     L->>R: mf-manifest.json + ./manifest
+    Note over L: integrity from the configuration — check of the<br/>manifest hash, integrity on scripts
     R-->>L: { name, tag, routes, requires, extra }
   end
   Note over H: A failed or invalid manifest is logged<br/>and skipped, the rest keep working
@@ -181,6 +182,10 @@ sequenceDiagram
 
 Hovering or focusing a link calls `prefetch(path)`: the remote's code is loaded in advance, and
 following the link takes it from the loader cache.
+
+If a remote's manifest failed to load at startup, navigating to an unknown path tries it again
+(`createManifestSet().retryFailed()`, at most once every 5 seconds). Once the manifest appears, the host
+replaces the route table (`router.replaceTable`), and the remote opens without a reload.
 
 ## 4. Mounting a remote in `<mfe-outlet>`
 
@@ -285,16 +290,21 @@ The registry picks a postfix by the version's compatibility line; the kit regist
 flowchart LR
   A["accounts<br/>@rwcjs/ui 0.2.0-next"] -- "useKit()" --> R
   P["payments<br/>@rwcjs/ui 0.1.0"] -- "useKit()" --> R
-  X["future remote<br/>@rwcjs/ui 0.1.x"] -. "useKit()" .-> R
+  X["probe (test)<br/>@rwcjs/ui 0.1.0"] -- "useKit()" --> R
 
   R{"Registry<br/>postfixFor(kit, version)<br/>+ beforeRegister"}
 
   R -- "v0-2: registered" --> T2["rwc-button-v0-2, …"]
   R -- "v0-1: registered" --> T1["rwc-button-v0-1, …"]
-  R -. "v0-1: reused<br/>(same class)<br/>conflict<br/>(different build)" .-> T1
+  R -- "v0-1: reused<br/>(shared kit instance)" --> T1
 
-  R --> rec[("records():<br/>@rwcjs/ui v0-2 → accounts<br/>@rwcjs/ui v0-1 → payments")]
+  R --> rec[("records():<br/>@rwcjs/ui v0-2 → accounts<br/>@rwcjs/ui v0-1 → payments, probe")]
 ```
+
+payments and probe are built with `@rwcjs/ui` of the same line, so Module Federation gives both
+one instance of the kit and of `@rwcjs/core` (modules shared by compatibility line), and the registry
+marks the second consumer as `reused`. accounts on the 0.2 line gets its own instance.
+Without a shared kit, two builds with the same postfix would result in `conflict`.
 
 `denied` or `conflict` becomes an exception from `register()` — the outlet shows a
 fallback instead of a half-working remote.
@@ -383,19 +393,47 @@ the configuration and for remote code at the URLs from the configuration.
 an identifier: `credit_cards`, not `credit-cards`. `validateManifest` and the configuration
 check reject other names.
 
-### Why remotes share nothing
+### What is shared and what is not
 
-Measurement (`experiments/r4/measure.ts`): the overview page with two rwc remotes.
+There is one rule: only compatible code is shared, and there is no singleton anywhere. A singleton would tie all
+remotes to one version, and an upgrade would become a joint release of all teams again.
+
+| What | How | Why |
+| --- | --- | --- |
+| Module Federation runtime | in production remotes take it from the host (`sharedRuntime`) | it is platform infrastructure; about 17.6 KB gzip saved on each remote |
+| UI kit and `@rwcjs/core` | a shared instance for remotes of one line (`^version`) | one line — the same tags; without this, two builds of the kit conflict |
+| React | each remote has its own copy | isolation matters more than size; there are usually few React remotes on a page |
+| Everything else | the remote's own | independent upgrades |
+
+The cost of the shared runtime: the major version of `@module-federation/*` must match in the host and the remotes. In dev
+a remote ships the runtime itself and opens without a host.
+
+Why not a singleton core — measurement (`experiments/r4/measure.ts`, before the shared MF runtime):
 
 | Mode | host | accounts | payments | Total |
 | --- | ---: | ---: | ---: | ---: |
-| Isolation (default) | 127.5 KB | 209.1 KB | 209.0 KB | **545.7 KB** |
-| Shared `@rwcjs/core` singleton (`MFE_SHARE_CORE=1`) | 129.2 KB | 196.0 KB | 217.8 KB | **543.0 KB** |
+| Isolation | 127.5 KB | 209.1 KB | 209.0 KB | **545.7 KB** |
+| Singleton `@rwcjs/core` (`MFE_SHARE_CORE=1`) | 129.2 KB | 196.0 KB | 217.8 KB | **543.0 KB** |
 
-A shared core saves 1.2% of the page's JS, but ties all remotes to one framework major version:
-an upgrade becomes a joint release of all teams again. Most of a remote's weight is the Module
-Federation runtime (about 118 KB), not the framework. `provide`/`inject` across the boundary of remotes with
-different copies of core does not work, so shared state is distributed through properties and events.
+A singleton saved 1.2% of the page's JS, while most of a remote's weight came from the MF runtime — so that is what
+was made shared. `provide`/`inject` across the boundary of remotes with different copies of core does not work,
+so shared state is distributed through properties and events.
+
+### Remote code integrity
+
+A bank needs a file replaced on the CDN or in transit not to be executed. The chain of hashes
+starts in the host configuration: `remotes[].integrity` is the hash of `mf-manifest.json`, and the
+manifest holds the hashes of remoteEntry and of every chunk (the remote build writes them). The host checks the
+manifest and sets `integrity` on every remote script; a file from the URL of a checked remote
+that is not in the table is blocked. The bundler's SRI did not help here: remote chunks are loaded by
+the host's MF runtime, not by the remote's runtime.
+
+### Permissions on the shared store
+
+A remote requests changes with an event from its own element, and the host knows from the outlet who is asking.
+Permissions are in the host configuration; by default no one changes the session. This is protection against mistakes and
+hidden coupling, not a security boundary: remote code runs on the same page and
+could dispatch an event from another element. Integrity protects against malicious code.
 
 ### Contract versions
 

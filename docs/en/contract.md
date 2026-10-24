@@ -75,8 +75,15 @@ its own navigation it dispatches `popstate` so that remote routers see the new U
 
 ## Bus and shared state
 
-- State lives in the host and arrives in the `platform` property. A remote requests changes with the
-  `store:patch` topic.
+- State lives in the host and arrives in the `platform` property. A remote requests changes
+  with an event from its own element: `this.dispatchEvent(patchEvent({ theme: "dark" }))`
+  (`platform:patch`). The host learns from the outlet which remote it is and applies only the fields
+  allowed to it in `storeAccess` of the host configuration; by default no one changes the session.
+  Denied fields are dropped, and a `store:denied` event goes to the transport.
+- The `store:patch` topic on the bus also works, but it is anonymous: from it the host applies only
+  the fields open to all remotes (`"*"` in `storeAccess`).
+- Store permissions are protection against mistakes and hidden coupling, not a security boundary: remote
+  code runs on the same page.
 - The bus (`@mfe/bus`): `publish(topic, payload)` / `subscribe(topic, handler, { signal })`
   on top of `CustomEvent` on `document`. Topics and payloads are the `PlatformTopics` interface;
   custom topics are added through declaration merging.
@@ -95,8 +102,11 @@ useKit({ name: "@rwcjs/ui", version: "0.2.0", consumer: manifest.name, kit: ui, 
 ```
 
 The postfix is the compatibility line: `v<major>`, for 0.x — `v0-<minor>`. Remotes on the same
-line must share one kit instance (a shared MF module); a different build with the same
-postfix is a conflict, and the remote's `register()` fails with a clear message.
+line get one kit instance: `defineRemoteConfig` shares the kits from `kits` and
+`@rwcjs/core` through Module Federation by the same line (`^version`, not a singleton), and the registry
+marks the second consumer as `reused`. Each remote has its own copy of incompatible versions.
+If a remote is built without a shared kit (`shareKits: false`), a different build with the same postfix is a
+conflict, and the remote's `register()` fails with a clear message.
 
 ## Extension points
 
@@ -106,6 +116,16 @@ postfix is a conflict, and the remote's `register()` fails with a clear message.
 | `PolicyHook.beforeMount` | `defineMfeOutlet({ policies })` | deny mounting |
 | `PolicyHook.beforeRegister` | `registry.use(policy)` | deny registration of a kit version |
 | `manifest.extra` | remote manifest | remote metadata (team, owner) without a schema change |
+
+## Observability events
+
+| Event | When |
+| --- | --- |
+| `mount:start`, `mount:code-loaded`, `mount:ready` | mounting stages, with `timings` |
+| `mount:error`, `mount:denied` | load or render error, policy denial |
+| `register:ok`, `register:denied` | registration of a kit version, including `reused` |
+| `store:denied` | a remote requested a store field it has no permission for |
+| `integrity:denied` | a remote's manifest or file failed the integrity check |
 
 ## `<mfe-outlet>` states
 

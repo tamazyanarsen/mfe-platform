@@ -159,3 +159,88 @@ the other remotes keep working.
   whose route it opens. `register()` is not called at that point.
 - **Retry.** If a remote fails to load, the fallback has a «Повторить» (Retry) button; programmatically —
   `outlet.retry()`. Each attempt is a new mount with its own `mountId`.
+
+## Remote code integrity
+
+A remote file replaced on the CDN or in transit is not executed: the host checks a chain of hashes
+from its configuration to every chunk.
+
+1. The remote's production build (`bun run build`) adds to `dist/mf-manifest.json` the hashes of all
+   JS and CSS files and puts `dist/mf-manifest.json.integrity` next to it — the hash of the manifest itself.
+2. On deployment this hash is added to the host configuration:
+
+   ```json
+   { "name": "accounts", "entry": "https://cdn.bank.example/accounts/mf-manifest.json",
+     "integrity": "sha384-…" }
+   ```
+
+3. The host (`createIntegrityPlugin` from `@mfe/host-runtime`) checks the manifest against this hash and
+   sets `integrity` and `crossorigin="anonymous"` on remoteEntry and every chunk. A file from the URL
+   of a checked remote that is not in the hash table is blocked. A violation is an
+   `integrity:denied` event in the transport and in the debug panel.
+
+What is needed from the infrastructure:
+
+- **CORS on the remote's CDN.** SRI for a file from another origin works only with a CORS request:
+  the remote's server must send `Access-Control-Allow-Origin` for the host's address.
+- **The hash changes with every build.** Deploying a checked remote means a new file and a new
+  entry in the host configuration. Without `integrity` a remote loads as before, so the check
+  can be enabled one remote at a time.
+- **Host CSP.** `script-src` with the list of remote addresses is recommended; the platform
+  adds no inline scripts.
+
+Checking in the browser — `bun run test:e2e:prod`: a production build, with a replaced manifest,
+remoteEntry and chunk.
+
+## Permissions on the shared store
+
+A remote requests a change to shared state with an event from its own element:
+
+```ts
+import { patchEvent } from "@mfe/contract";
+
+this.dispatchEvent(patchEvent({ theme: "dark" }));
+```
+
+The host learns from the outlet which remote it is and applies only the fields allowed to it. Permissions are
+in `platform.config.json`:
+
+```json
+"storeAccess": { "*": ["selected", "theme", "locale"], "auth": ["session"] }
+```
+
+`"*"` is the fields open to all remotes; permissions add up. Without `storeAccess`,
+`DEFAULT_STORE_ACCESS` applies: everything except `session` is open to everyone. Denied fields are dropped,
+and a `store:denied` event goes to the transport. The `store:patch` topic on the bus is anonymous and gets
+only the `"*"` fields.
+
+## Size budget
+
+After the build, `bun run check:size` computes for each remote what the host loads for it
+(from `mf-manifest.json`: remoteEntry, the `./manifest` and `./entry` chunks, shared modules),
+and compares it with the budget from the remote's `package.json`:
+
+```json
+"mfe": { "sizeBudget": { "gzipKb": 50 } }
+```
+
+A remote over budget fails CI. The `create:remote` templates come with a budget, and
+`check:templates` checks it too.
+
+## Shared modules
+
+`defineRemoteConfig` (config/rsbuild-remote.ts) decides what a remote shares with others:
+
+| Option | Default | What it does |
+| --- | --- | --- |
+| `sharedRuntime` | `true` | in production the remote takes the Module Federation runtime from the host (about 17.6 KB gzip saved); in dev it ships its own and opens without a host |
+| `shareKits` | `true` | the kits from `kits` and `@rwcjs/core` are shared with remotes on the same compatibility line — one kit instance instead of a conflict between builds |
+
+There is no singleton: each remote has its own copy of incompatible versions. With the shared runtime the major version of
+`@module-federation/*` must match in the host and the remotes.
+
+## Checking the production build
+
+`bun run test:e2e:prod` builds everything and runs `e2e-prod/` on preview servers: integrity,
+the shared kit, the shared runtime — what dev does not have. `apps/mfe-probe` is a test remote on the same
+kit line as payments; it is not in the host configuration, the tests plug it in with an override.

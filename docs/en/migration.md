@@ -92,11 +92,13 @@ hyphens, rename them before the migration.
 
 ## 4. Shared dependencies
 
-By default nothing is shared: each remote ships its own copy of the framework, and teams
-upgrade it independently. If the framework used to be a singleton, before giving that up
-check whether remotes pass framework context to each other (`provide`/`inject`,
-React Context) — across the remote boundary it only works with a shared copy. Shared state
-moves to the host store and the `platform` property. Numbers — in [architecture.md](architecture.md#why-remotes-share-nothing).
+There are no singleton dependencies: the framework is shared only between remotes with compatible
+versions, and incompatible ones ship their own copy — teams upgrade independently. If the
+framework used to be a singleton, before giving that up check whether remotes pass framework
+context to each other (`provide`/`inject`, React Context) — across the boundary of remotes with
+different copies it does not work. Shared state moves to the host store and the
+`platform` property, and changes go through the `patchEvent` event. What is shared and why —
+[architecture.md](architecture.md#what-is-shared-and-what-is-not).
 
 ## 5. Check the remote
 

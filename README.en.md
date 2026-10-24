@@ -20,6 +20,12 @@ separately, teams update versions independently, and the host assembles them int
   a new remote is added by deploying the file, without rebuilding the host.
 - **Tools for teams.** A new remote with one command, a contract test without a host, overriding a
   remote with a local one right on the staging environment or in production, an on-page debug panel.
+- **Integrity checks.** A chain of hashes from the host configuration to every remote chunk:
+  a file replaced on the CDN is not executed.
+- **Permissions on shared state.** Which remote may change which store fields is set in the host
+  configuration; by default no one changes the session.
+- **Only compatible code is shared.** The Module Federation runtime belongs to the host, the UI kit is one per
+  compatibility line, with no singleton: teams update independently.
 - **No network.** The runtime makes no requests other than loading remote code and configuration from
   your URLs: no telemetry, no CDN, no fonts.
 
@@ -63,10 +69,11 @@ bun install && bun run dev                                   # http://localhost:
 Checks:
 
 ```bash
-bun run ci                          # package boundaries, lint, types, unit tests, build
+bun run ci                          # package boundaries, lint, types, unit tests, build, size budget
 bun run check:templates             # create:remote templates are generated, tested, built
 bunx playwright install chromium    # once
-bun run test:e2e                    # end-to-end tests of the demo setup
+bun run test:e2e                    # end-to-end tests of the demo setup (dev)
+bun run test:e2e:prod               # production build: integrity, shared kit and runtime
 ```
 
 ## Structure
@@ -77,6 +84,7 @@ apps/
   mfe-accounts/       rwc remote, @rwcjs/ui 0.2.0-next
   mfe-payments/       rwc remote, @rwcjs/ui 0.1.0
   mfe-legacy-react/   React remote
+  mfe-probe/          test remote for e2e: a second build on the payments kit line
 packages/
   contract/           contract types, manifest, navigation, bus topics, extension points
   host-runtime/       <mfe-outlet>, MF loader, router, links, configuration, overrides, transports
@@ -87,6 +95,8 @@ packages/
   testing/            mountRemote, checkRemote — remote tests without a host
   devtools/           on-page debug panel
 templates/            create:remote templates: vanilla, rwc, react
+config/               remote build: shared modules, integrity hashes
+e2e/, e2e-prod/       end-to-end tests of the dev setup and the production build
 docs/                 architecture, contract, development, migration
 ```
 
@@ -106,7 +116,7 @@ Moving an existing Module Federation setup to the contract — [docs/en/migratio
 - [docs/en/comparison.md](docs/en/comparison.md) — how the platform differs from the usual "React host + MF" setup: benefits, costs, when to choose what
 - [docs/en/architecture.md](docs/en/architecture.md) — diagrams: packages, the page, mounting, remote interaction
 - [docs/en/contract.md](docs/en/contract.md) — the remote contract
-- [docs/en/development.md](docs/en/development.md) — new remote, tests, override, debug panel
+- [docs/en/development.md](docs/en/development.md) — new remote, tests, override, debug panel, integrity, store permissions, size budget
 - [docs/en/migration.md](docs/en/migration.md) — migrating an existing MF setup
 
 ## License
