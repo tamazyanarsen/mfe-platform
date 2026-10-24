@@ -10,6 +10,13 @@ export interface RemoteConfig {
   readonly port: number;
   /** Киты, версии которых ремоут сообщает реестру платформы: `__MFE_KIT_VERSIONS__`. */
   readonly kits?: readonly string[];
+  /**
+   * Брать рантайм Module Federation у хоста, а не везти свой (около 17 KB gzip на ремоут).
+   * Только в production-сборке: в dev ремоут открывается и без хоста. Цена — ремоуты
+   * зависят от рантайма MF хоста, поэтому мажор `@module-federation/*` у хоста и ремоутов
+   * должен совпадать. По умолчанию включено.
+   */
+  readonly sharedRuntime?: boolean;
   readonly extend?: RsbuildConfig;
 }
 
@@ -22,7 +29,13 @@ const installedVersion = (pkg: string): string =>
  * Общая сборка ремоута: экспонирует `./manifest` и `./entry` по контракту
  * (REMOTE_EXPOSES) и ничего не шарит — у ремоута своя копия рантайма.
  */
-export const defineRemoteConfig = ({ name, port, kits = [], extend = {} }: RemoteConfig) =>
+export const defineRemoteConfig = ({
+  name,
+  port,
+  kits = [],
+  sharedRuntime = true,
+  extend = {},
+}: RemoteConfig) =>
   defineConfig({
     ...extend,
     source: {
@@ -48,6 +61,9 @@ export const defineRemoteConfig = ({ name, port, kits = [], extend = {} }: Remot
             ? { "@rwcjs/core": { singleton: true, requiredVersion: "^3.2.0" } }
             : {},
         dts: false,
+        experiments: {
+          externalRuntime: sharedRuntime && process.env.NODE_ENV === "production",
+        },
       }),
       pluginIntegrity(),
       ...(extend.plugins ?? []),

@@ -23,7 +23,7 @@
   },
   "mfe": {
     "sizeBudget": {
-      "gzipKb": 70
+      "gzipKb": 50
     }
   }
 }

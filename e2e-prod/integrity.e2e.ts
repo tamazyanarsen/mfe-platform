@@ -113,9 +113,9 @@ test("подменённый манифест отклоняется, событ
 
   await page.goto("/accounts");
   await expect(page.getByTestId("not-found")).toBeVisible();
-  expect(await platformEvents(page, "integrity:denied")).toContainEqual(
-    expect.objectContaining({ name: "accounts" }),
-  );
+  await expect
+    .poll(() => platformEvents(page, "integrity:denied"))
+    .toContainEqual(expect.objectContaining({ name: "accounts" }));
 
   await page.locator("header nav").getByRole("link", { name: "Платежи" }).click();
   await expect(page.getByRole("heading", { name: "Платежи" })).toBeVisible();

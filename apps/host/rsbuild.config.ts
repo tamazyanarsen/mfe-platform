@@ -9,6 +9,9 @@ export default defineConfig({
       remotes: {},
       shared: {},
       dts: false,
+      // Хост отдаёт свой рантайм MF ремоутам: в production они его не везут
+      // (sharedRuntime в config/rsbuild-remote.ts).
+      experiments: { provideExternalRuntime: true },
     }),
   ],
   server: { port: 3000, strictPort: true, cors: { origin: /^http:\/\/localhost:\d+$/ } },
