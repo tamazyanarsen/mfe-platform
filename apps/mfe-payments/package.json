@@ -17,6 +17,7 @@
     "@rwcjs/ui": "0.1.0"
   },
   "devDependencies": {
+    "@mfe/testing": "workspace:*",
     "@module-federation/rsbuild-plugin": "^2.9.2",
     "@rsbuild/core": "^2.2.14"
   }

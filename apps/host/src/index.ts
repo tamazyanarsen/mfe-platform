@@ -1,23 +1,49 @@
 import "./styles.css";
 import { createBus, createStore } from "@mfe/bus";
-import { PLATFORM_PROP, type PlatformState, type RemoteManifest } from "@mfe/contract";
 import {
+  PLATFORM_PROP,
+  type PlatformState,
+  type RemoteManifest,
+  validateManifest,
+} from "@mfe/contract";
+import { createDevtools } from "@mfe/devtools";
+import {
+  applyRemoteOverrides,
   combineTransports,
   consoleTransport,
   createFederationLoader,
   createHostRouter,
   createMemoryTransport,
+  createPrefetcher,
   createRouteTable,
   defineMfeOutlet,
   type FallbackContext,
+  interceptLinks,
   type MfeOutletElement,
   type RouteMatch,
 } from "@mfe/host-runtime";
 import { getPlatformRegistry } from "@mfe/registry";
 import { loadRemote, registerRemotes } from "@module-federation/enhanced/runtime";
-import { NAV, OVERVIEW, REMOTES } from "./remotes";
+import { loadPlatformConfig, type PlatformConfig } from "./remotes";
 
-const fallback = ({ state, remote, message }: FallbackContext): Node => {
+// ---------------------------------------------------------------- конфигурация
+
+let config: PlatformConfig;
+try {
+  config = await loadPlatformConfig();
+} catch (error) {
+  const alert = document.createElement("div");
+  alert.className = "status status-error";
+  alert.setAttribute("role", "alert");
+  alert.textContent = "Конфигурация платформы недоступна. Попробуйте обновить страницу позже.";
+  document.body.append(alert);
+  throw error;
+}
+
+// Подмена адресов ремоутов для разработки: ?mfe-override=payments=http://localhost:3002/...
+const { remotes, overridden } = applyRemoteOverrides(config.remotes);
+
+const fallback = ({ state, remote, message, retry }: FallbackContext): Node => {
   const element = document.createElement("div");
   element.className = `status status-${state}`;
   element.setAttribute("role", state === "loading" ? "status" : "alert");
@@ -26,19 +52,43 @@ const fallback = ({ state, remote, message }: FallbackContext): Node => {
       ? "Загрузка модуля…"
       : state === "denied"
         ? `Модуль «${remote}» запрещён: ${message}`
-        : "Модуль недоступен. Попробуйте обновить страницу позже.";
+        : "Модуль недоступен.";
+  if (retry) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "Повторить";
+    button.addEventListener("click", retry);
+    element.append(" ", button);
+  }
   return element;
 };
 
-registerRemotes(REMOTES.map(({ name, entry }) => ({ name, entry })));
-const loader = createFederationLoader(loadRemote);
-// Наблюдаемость по умолчанию: консоль и кольцевой буфер в памяти (наружу ничего).
+// ---------------------------------------------------------------- наблюдаемость
+
+// Наблюдаемость по умолчанию: консоль и кольцевой буфер в памяти (наружу ничего). Панель
+// отладки включена в dev-сборке; на стенде и в проде — параметром ?mfe-devtools.
+const DEVTOOLS_KEY = "mfe-platform.devtools";
+const devtoolsRequested = new URLSearchParams(location.search).has("mfe-devtools");
+const devtoolsEnabled = (() => {
+  try {
+    if (devtoolsRequested) sessionStorage.setItem(DEVTOOLS_KEY, "1");
+    return import.meta.env.DEV || sessionStorage.getItem(DEVTOOLS_KEY) === "1";
+  } catch {
+    return import.meta.env.DEV || devtoolsRequested;
+  }
+})();
+const devtools = devtoolsEnabled ? createDevtools({ overrides: overridden }) : null;
+
 const events = createMemoryTransport(500);
-const outletTag = defineMfeOutlet({
-  loader,
-  renderFallback: fallback,
-  transport: combineTransports(consoleTransport, events),
-});
+const transport = combineTransports(
+  consoleTransport,
+  events,
+  ...(devtools ? [devtools.transport] : []),
+);
+
+registerRemotes(remotes.map(({ name, entry }) => ({ name, entry })));
+const loader = createFederationLoader(loadRemote);
+const outletTag = defineMfeOutlet({ loader, renderFallback: fallback, transport });
 
 // ---------------------------------------------------------------- общее состояние
 
@@ -62,10 +112,10 @@ store.subscribe((state) => {
 });
 
 // Диагностика из консоли браузера: mfe.events() — события монтирования, mfe.registry —
-// учёт китов, mfe.store и mfe.bus — общее состояние и шина.
+// учёт китов, mfe.store и mfe.bus — общее состояние и шина, mfe.devtools — панель.
 const registry = getPlatformRegistry();
-registry.setTransport(combineTransports(consoleTransport, events));
-Object.assign(window, { mfe: { events: events.events, registry, store, bus } });
+registry.setTransport(transport);
+Object.assign(window, { mfe: { events: events.events, registry, store, bus, devtools } });
 
 const createOutlet = (remote?: string, basename?: string) => {
   const outlet = document.createElement(outletTag) as MfeOutletElement;
@@ -83,7 +133,7 @@ header.className = "shell-header";
 const brand = document.createElement("span");
 brand.textContent = "MFE platform";
 const nav = document.createElement("nav");
-for (const { href, title } of NAV) {
+for (const { href, title } of config.nav) {
   const link = document.createElement("a");
   link.href = href;
   link.textContent = title;
@@ -101,6 +151,16 @@ user.className = "user";
 user.textContent = store.get().session?.name ?? "";
 header.append(brand, nav, user, themeToggle);
 
+// Подмена видна всегда: забытая подмена — частая причина «у меня работает, у вас нет».
+if (overridden.length > 0) {
+  const badge = document.createElement("span");
+  badge.className = "override-badge";
+  badge.dataset.testid = "override-badge";
+  badge.textContent = `override: ${overridden.map(({ name }) => name).join(", ")}`;
+  badge.title = overridden.map(({ name, entry }) => `${name} → ${entry}`).join("\n");
+  header.append(badge);
+}
+
 const main = document.createElement("main");
 main.className = "page";
 const routed = createOutlet();
@@ -114,6 +174,7 @@ notFound.textContent = "Страница не найдена";
 main.append(routed, overview, notFound);
 
 document.body.append(header, main);
+if (devtools && devtoolsRequested) devtools.open();
 
 // ---------------------------------------------------------------- страницы
 
@@ -135,7 +196,9 @@ const show = (page: Page) => {
   // Обзор — страница хоста: ремоуты рядом, каждый со своим basename. Уходя со страницы,
   // ремоуты размонтируются.
   if (page.kind === "overview" && overview.childElementCount === 0) {
-    overview.append(...OVERVIEW.map(({ remote, basename }) => createOutlet(remote, basename)));
+    overview.append(
+      ...config.overview.map(({ remote, basename }) => createOutlet(remote, basename)),
+    );
   } else if (page.kind !== "overview") {
     for (const outlet of overview.children) outlets.delete(outlet as MfeOutletElement);
     overview.replaceChildren();
@@ -144,19 +207,28 @@ const show = (page: Page) => {
 
 // ---------------------------------------------------------------- маршруты
 
-// Манифесты грузятся заранее, код ремоутов — при первом попадании на их маршрут.
+// Манифесты грузятся заранее, код ремоутов — при первом попадании на их маршрут (или при
+// наведении на ссылку). Недоступный или кривой манифест не ломает остальные маршруты.
 const manifests = (
-  await Promise.allSettled(REMOTES.map(({ name }) => loader.loadManifest(name)))
+  await Promise.allSettled(remotes.map(({ name }) => loader.loadManifest(name)))
 ).flatMap((result, index): RemoteManifest[] => {
-  if (result.status === "fulfilled") return [result.value];
-  console.error(`[host] manifest of "${REMOTES[index]?.name}" is unavailable`, result.reason);
-  return [];
+  const name = remotes[index]?.name;
+  if (result.status === "rejected") {
+    console.error(`[host] manifest of "${name}" is unavailable`, result.reason);
+    return [];
+  }
+  const problems = validateManifest(result.value);
+  if (problems.length > 0) {
+    console.error(`[host] manifest of "${name}" is invalid: ${problems.join("; ")}`);
+    return [];
+  }
+  return [result.value];
 });
 
 const table = createRouteTable(manifests);
-for (const { pattern, remotes } of table.conflicts) {
+for (const { pattern, remotes: claimed } of table.conflicts) {
   console.warn(
-    `[host] route "${pattern}" is claimed by ${remotes.join(", ")}; using ${remotes[0]}`,
+    `[host] route "${pattern}" is claimed by ${claimed.join(", ")}; using ${claimed[0]}`,
   );
 }
 
@@ -181,11 +253,8 @@ const router = createHostRouter({
   },
 });
 
-nav.addEventListener("click", (event) => {
-  const link = (event.target as Element).closest("a");
-  if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
-  event.preventDefault();
-  router.navigate(link.pathname);
-});
+// Обычные ссылки хоста и ремоутов — через роутер, без перезагрузки; наведение на ссылку
+// заранее загружает код ремоута.
+interceptLinks({ router, prefetch: createPrefetcher({ table, loader }) });
 
 router.start();

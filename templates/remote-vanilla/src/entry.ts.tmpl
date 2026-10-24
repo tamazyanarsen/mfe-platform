@@ -1,0 +1,10 @@
+import type { RemoteModule } from "@mfe/contract";
+import { manifest } from "./manifest";
+import { __CLASS__Element } from "./view";
+
+export { manifest };
+
+// Повторный вызов безопасен: тег уже зарегистрирован — ничего не делаем.
+export const register: RemoteModule["register"] = () => {
+  if (!customElements.get(manifest.tag)) customElements.define(manifest.tag, __CLASS__Element);
+};

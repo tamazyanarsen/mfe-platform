@@ -1,0 +1,18 @@
+import type { NavigateDetail, PlatformState } from "@mfe/contract";
+
+export interface __CLASS__Props {
+  readonly basename?: string;
+  readonly platform?: PlatformState | null;
+  readonly onNavigate?: (detail: NavigateDetail) => void;
+}
+
+/** Обычный React-компонент: о платформе он знает только пропсы и колбэк навигации. */
+export const __CLASS__ = ({ platform, onNavigate }: __CLASS__Props) => (
+  <section style={{ fontFamily: "system-ui, sans-serif" }}>
+    <h2>__TITLE__</h2>
+    <p>Выбранный счёт: {platform?.selected?.title ?? "не выбран"}</p>
+    <button type="button" onClick={() => onNavigate?.({ to: "/" })}>
+      На обзор
+    </button>
+  </section>
+);

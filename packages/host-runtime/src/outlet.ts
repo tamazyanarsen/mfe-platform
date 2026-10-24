@@ -17,6 +17,8 @@ export interface FallbackContext {
   readonly remote: string;
   /** Текст ошибки или причина запрета. */
   readonly message?: string;
+  /** Только для `error`: повторить загрузку — то же, что `outlet.retry()`. */
+  readonly retry?: () => void;
 }
 
 export interface OutletOptions {
@@ -48,9 +50,11 @@ export type MfeOutletElement = HTMLElement & {
   readonly mountId: string | undefined;
   /** Элемент ремоута, когда он смонтирован. */
   readonly remoteElement: HTMLElement | null;
+  /** После ошибки загружает ремоут заново; в остальных состояниях ничего не делает. */
+  retry(): void;
 };
 
-const defaultFallback = ({ state, remote, message }: FallbackContext): Node => {
+const defaultFallback = ({ state, remote, message, retry }: FallbackContext): Node => {
   const element = document.createElement("div");
   element.setAttribute("role", state === "loading" ? "status" : "alert");
   element.textContent =
@@ -59,6 +63,13 @@ const defaultFallback = ({ state, remote, message }: FallbackContext): Node => {
       : state === "denied"
         ? `${remote} is not allowed here: ${message ?? ""}`
         : `${remote} is unavailable`;
+  if (retry) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "Retry";
+    button.addEventListener("click", retry);
+    element.append(" ", button);
+  }
   return element;
 };
 
@@ -134,6 +145,10 @@ export const defineMfeOutlet = (options: OutletOptions, tag = "mfe-outlet"): str
 
     get remoteElement(): HTMLElement | null {
       return this.#remoteElement;
+    }
+
+    retry() {
+      if (this.#state === "error" && this.remote && this.isConnected) void this.#mount(this.remote);
     }
 
     connectedCallback() {
@@ -262,7 +277,14 @@ export const defineMfeOutlet = (options: OutletOptions, tag = "mfe-outlet"): str
         this.#remoteElement = null;
         const phase = error instanceof RenderError ? "render" : "load";
         const info = errorInfo(error instanceof RenderError ? error.cause : error);
-        this.replaceChildren(renderFallback({ state: "error", remote, message: info.message }));
+        this.replaceChildren(
+          renderFallback({
+            state: "error",
+            remote,
+            message: info.message,
+            retry: () => this.retry(),
+          }),
+        );
         this.#setState("error", remote);
         emit({ type: "mount:error", error: info, details: { phase } });
       }

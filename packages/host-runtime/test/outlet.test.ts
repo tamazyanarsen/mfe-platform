@@ -177,6 +177,40 @@ describe("<mfe-outlet>", () => {
     });
   });
 
+  test("retry() после ошибки загружает ремоут заново, кнопка fallback делает то же", async () => {
+    const remote = fakeRemote("flaky");
+    let failures = 2;
+    const loader: RemoteLoader = {
+      loadManifest: async () => remote.manifest,
+      loadModule: async () => {
+        if (failures-- > 0) throw new Error("chunk failed");
+        return remote.module;
+      },
+    };
+    const transport = createMemoryTransport();
+    const { outlet, state } = await mount({ loader, transport }, "flaky");
+    expect(state).toBe("error");
+
+    outlet.querySelector("button")?.click();
+    expect(outlet.state).toBe("loading");
+    expect(await whenOutletSettles(outlet)).toBe("error");
+
+    outlet.retry();
+    expect(await whenOutletSettles(outlet)).toBe("ready");
+    expect(outlet.remoteElement?.localName).toBe(remote.manifest.tag);
+    const starts = transport.events().filter((event) => event.type === "mount:start");
+    expect(new Set(starts.map((event) => event.mountId)).size).toBe(3);
+  });
+
+  test("retry() в состоянии ready ничего не делает", async () => {
+    const remote = fakeRemote("stable");
+    const { loader, calls } = memoryLoader(remote);
+    const { outlet } = await mount({ loader, transport: createMemoryTransport() }, "stable");
+    outlet.retry();
+    expect(outlet.state).toBe("ready");
+    expect(calls).toEqual(["manifest:stable", "module:stable"]);
+  });
+
   test("несовместимая версия контракта и кривой манифест — ошибка, а не монтирование", async () => {
     const future = fakeRemote("future", { contractVersion: CONTRACT_VERSION + 1 });
     const invalid = fakeRemote("invalid", { tag: "NoDash" });

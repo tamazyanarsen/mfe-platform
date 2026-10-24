@@ -28,6 +28,13 @@ describe("validateManifest", () => {
     },
   );
 
+  test("имя — JS-идентификатор: оно же имя контейнера Module Federation", () => {
+    expect(validateManifest({ ...valid, name: "credit-cards" })).toEqual([
+      "name must be an identifier",
+    ]);
+    expect(validateManifest({ ...valid, name: "credit_cards" })).toEqual([]);
+  });
+
   test("пустой список маршрутов допустим: ремоут-виджет без своей страницы", () => {
     expect(validateManifest({ ...valid, routes: [] })).toEqual([]);
   });

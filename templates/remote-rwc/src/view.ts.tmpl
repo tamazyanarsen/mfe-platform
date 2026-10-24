@@ -1,0 +1,24 @@
+import { navigateEvent, type PlatformState } from "@mfe/contract";
+import { button, configCustomComponent, css, defineComponent, div, h2, p } from "@rwcjs/core";
+
+class __CLASS__View extends defineComponent({
+  // basename хост передаёт атрибутом, состояние платформы — свойством platform.
+  props: { basename: "", platform: null as PlatformState | null },
+  styles: css`
+    :host { display: block; font-family: system-ui, sans-serif }
+  `,
+}) {
+  render() {
+    return div(
+      h2("__TITLE__"),
+      p(() => `Выбранный счёт: ${this.props.platform()?.selected?.title ?? "не выбран"}`),
+      // Чужой маршрут: просим хост, историю сами не трогаем.
+      button({ "@click": () => this.dispatchEvent(navigateEvent("/")) }, "На обзор"),
+    );
+  }
+}
+
+export const [__CAMEL__View, register__CLASS__View] = configCustomComponent(
+  __CLASS__View,
+  "__TAG__",
+);

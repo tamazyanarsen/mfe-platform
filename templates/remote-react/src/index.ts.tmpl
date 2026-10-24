@@ -1,0 +1,5 @@
+import { manifest, register } from "./entry";
+
+// Самостоятельный запуск ремоута, без хоста.
+register();
+document.body.append(document.createElement(manifest.tag));

@@ -35,6 +35,7 @@ export const REMOTE_EXPOSES = {
   entry: "./entry",
 } as const;
 
+const NAME_RE = /^[A-Za-z_$][\w$]*$/;
 const TAG_RE = /^[a-z][a-z0-9._]*-[a-z0-9._-]*$/;
 /** Точный путь "/accounts" или префикс "/accounts/*"; "*" — только в конце, после "/". */
 const ROUTE_RE = /^\/[^*]*$|^\/(?:[^*]*\/)?\*$/;
@@ -51,8 +52,9 @@ export const validateManifest = (value: unknown): string[] => {
   if (!Number.isInteger(manifest.contractVersion) || (manifest.contractVersion as number) < 1) {
     problems.push("contractVersion must be a positive integer");
   }
-  if (typeof manifest.name !== "string" || manifest.name === "") {
-    problems.push("name must be a non-empty string");
+  // Имя — это и имя контейнера Module Federation: JS-идентификатор, без дефисов.
+  if (typeof manifest.name !== "string" || !NAME_RE.test(manifest.name)) {
+    problems.push("name must be an identifier");
   }
   if (manifest.version !== undefined && typeof manifest.version !== "string") {
     problems.push("version must be a string");

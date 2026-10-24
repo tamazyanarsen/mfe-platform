@@ -18,6 +18,8 @@ jobs:
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
+      # Шаблоны create:remote: генерируются, проходят тест контракта и собираются.
+      - run: bun run check:templates
       - run: bunx playwright install --with-deps chromium
       - run: bun run test:e2e
         env:

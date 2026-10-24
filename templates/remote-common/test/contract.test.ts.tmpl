@@ -1,0 +1,25 @@
+import { expect, test } from "bun:test";
+import { checkRemote, mountRemote } from "@mfe/testing";
+import * as entry from "../src/entry";
+import { manifest } from "../src/manifest";
+
+test("ремоут соответствует контракту платформы", async () => {
+  expect(await checkRemote(entry, { manifest })).toEqual([]);
+});
+
+test("показывает выбранный счёт из состояния платформы", async () => {
+  const platform = {
+    session: null,
+    selected: { accountId: "1", title: "Текущий счёт" },
+    theme: "light",
+    locale: "ru-RU",
+  };
+  const { element, unmount } = await mountRemote(entry, {
+    basename: "/__NAME__",
+    props: { platform },
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const text = element?.shadowRoot?.textContent ?? element?.textContent ?? "";
+  expect(text).toContain("Текущий счёт");
+  unmount();
+});

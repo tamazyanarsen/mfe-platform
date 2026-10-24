@@ -1,0 +1,11 @@
+import { CONTRACT_VERSION, type RemoteManifest } from "@mfe/contract";
+
+// Лёгкий модуль без фреймворка: хост читает его, не загружая код ремоута.
+export const manifest: RemoteManifest = {
+  contractVersion: CONTRACT_VERSION,
+  name: "__NAME__",
+  version: __MFE_REMOTE_VERSION__,
+  tag: "__TAG__",
+  routes: ["/__NAME__", "/__NAME__/*"],
+  extra: { team: "__NAME__" },
+};

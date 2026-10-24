@@ -1,0 +1,46 @@
+import { navigateEvent, type PlatformState } from "@mfe/contract";
+
+/**
+ * Ремоут без фреймворка: обычный кастомный элемент. Вход — атрибут `basename` и свойство
+ * `platform`, выход — CustomEvent.
+ */
+export class __CLASS__Element extends HTMLElement {
+  static observedAttributes = ["basename"];
+
+  #platform: PlatformState | null = null;
+  readonly #root = this.attachShadow({ mode: "open" });
+
+  get platform(): PlatformState | null {
+    return this.#platform;
+  }
+
+  /** Состояние платформы; хост выставляет его при каждом изменении стора. */
+  set platform(value: PlatformState | null) {
+    this.#platform = value;
+    this.#render();
+  }
+
+  connectedCallback() {
+    this.#render();
+  }
+
+  attributeChangedCallback() {
+    this.#render();
+  }
+
+  #render() {
+    if (!this.isConnected) return;
+    const style = document.createElement("style");
+    style.textContent = ":host { display: block; font-family: system-ui, sans-serif }";
+    const title = document.createElement("h2");
+    title.textContent = "__TITLE__";
+    const selected = document.createElement("p");
+    selected.textContent = `Выбранный счёт: ${this.#platform?.selected?.title ?? "не выбран"}`;
+    const back = document.createElement("button");
+    back.type = "button";
+    back.textContent = "На обзор";
+    // Чужой маршрут: просим хост, историю сами не трогаем.
+    back.addEventListener("click", () => this.dispatchEvent(navigateEvent("/")));
+    this.#root.replaceChildren(style, title, selected, back);
+  }
+}

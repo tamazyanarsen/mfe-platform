@@ -1,0 +1,4 @@
+import { defineRemoteConfig } from "../../config/rsbuild-remote";
+
+// Чтобы подключить UI-кит, добавьте его в kits: версия попадёт в реестр платформы.
+export default defineRemoteConfig({ name: "__NAME__", port: __PORT__ });

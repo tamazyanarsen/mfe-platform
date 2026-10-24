@@ -1,11 +1,17 @@
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { killTree } from "./kill-tree";
 
 // Поднимает все dev-серверы одной командой; Ctrl+C или падение одного останавливает все.
-const apps = ["mfe-accounts", "mfe-payments", "mfe-legacy-react", "host"];
+// Приложения находятся сами: новый ремоут из create:remote подхватывается без правок здесь.
+const appsDir = join(import.meta.dir, "..", "apps");
+const apps = readdirSync(appsDir)
+  .filter((app) => existsSync(join(appsDir, app, "package.json")))
+  .sort((a, b) => Number(a === "host") - Number(b === "host"));
 
 const children = apps.map((app) =>
   Bun.spawn(["bun", "run", "dev"], {
-    cwd: `${import.meta.dir}/../apps/${app}`,
+    cwd: join(appsDir, app),
     stdout: "inherit",
     stderr: "inherit",
   }),

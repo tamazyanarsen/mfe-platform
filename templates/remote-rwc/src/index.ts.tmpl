@@ -1,0 +1,7 @@
+import { createRoot } from "@rwcjs/core";
+import { register } from "./entry";
+import { __CAMEL__View } from "./view";
+
+// Самостоятельный запуск ремоута, без хоста.
+register();
+document.body.append(createRoot(() => __CAMEL__View()));

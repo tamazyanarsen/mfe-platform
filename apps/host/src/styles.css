@@ -72,3 +72,14 @@ body {
   background: #111827;
   color: #f9fafb;
 }
+.override-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #b45309;
+  color: #fff;
+  font-size: 12px;
+}
+.status button {
+  font: inherit;
+  margin-left: 8px;
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@mfe-app/__NAME__",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@mfe/adapter-react": "workspace:*",
+    "@mfe/contract": "workspace:*",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@mfe/testing": "workspace:*",
+    "@module-federation/rsbuild-plugin": "^2.9.2",
+    "@rsbuild/core": "^2.2.14",
+    "@rsbuild/plugin-react": "^2.1.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.2.0"
+  }
+}

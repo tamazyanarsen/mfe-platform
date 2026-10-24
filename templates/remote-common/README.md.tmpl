@@ -1,0 +1,18 @@
+# __TITLE__
+
+Ремоут платформы (`__TEMPLATE__`). Создан командой `bun run create:remote`.
+
+```bash
+bun run dev          # из корня: все ремоуты и хост, http://localhost:3000/__NAME__
+bun test apps/mfe-__NAME__   # контракт и отрисовка без хоста
+```
+
+Самостоятельный запуск без хоста: `bun run --cwd apps/mfe-__NAME__ dev`,
+http://localhost:__PORT__.
+
+- `src/manifest.ts` — имя, тег, маршруты; без импортов фреймворка.
+- `src/entry.ts` — `manifest` и идемпотентная `register()`.
+- `test/contract.test.ts` — `checkRemote` из `@mfe/testing`: тот же контракт, что проверяет хост.
+
+Хост узнаёт о ремоуте из `apps/host/public/platform.config.json`; генератор уже добавил туда
+запись и пункт навигации. Контракт — [docs/contract.md](../../docs/contract.md).

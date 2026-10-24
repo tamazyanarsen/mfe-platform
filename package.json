@@ -10,13 +10,15 @@
   ],
   "scripts": {
     "dev": "bun run scripts/dev.ts",
+    "create:remote": "bun run scripts/create-remote.ts",
     "build": "bun run --filter './apps/*' build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "bun test",
     "test:e2e": "playwright test",
     "lint": "biome check .",
     "check:boundaries": "bun run scripts/check-boundaries.ts",
-    "ci": "bun run check:boundaries && bun run lint && bun run typecheck && bun run test && bun run build"
+    "ci": "bun run check:boundaries && bun run lint && bun run typecheck && bun run test && bun run build",
+    "check:templates": "bun run scripts/check-templates.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.0",
