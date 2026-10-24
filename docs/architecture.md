@@ -1,7 +1,10 @@
 # Архитектура
 
+[English](en/architecture.md) · Русский
+
 Схемы — Mermaid: GitHub рисует их прямо в этом файле, а правятся они как текст рядом с кодом.
-Подробности контракта — [contract.md](contract.md). Принципы и принятые решения — в
+Подробности контракта — [contract.md](contract.md), инструменты для команд —
+[development.md](development.md). Принципы и принятые решения — в
 [разделе 9](#9-принципы-и-решения).
 
 ## 1. Пакеты и зависимости
@@ -19,9 +22,11 @@ flowchart BT
     bus["@mfe/bus<br/><small>шина и стор</small>"]
   end
 
-  subgraph adapters["Адаптеры"]
+  subgraph adapters["Адаптеры и инструменты"]
     arwc["@mfe/adapter-rwc"]
     areact["@mfe/adapter-react"]
+    testing["@mfe/testing<br/><small>mountRemote, checkRemote</small>"]
+    devtools["@mfe/devtools<br/><small>панель отладки</small>"]
   end
 
   subgraph apps["Приложения"]
@@ -43,11 +48,14 @@ flowchart BT
   arwc --> bus
   arwc -. peer .-> rwc
   areact --> react
+  testing --> runtime
+  devtools --> registry
 
   host --> runtime
   host --> registry
   host --> bus
   host --> mf
+  host --> devtools
 
   acc --> arwc
   acc --> bus
@@ -57,6 +65,7 @@ flowchart BT
   pay --> contract
   leg --> areact
   leg --> contract
+  acc & pay & leg -. "тесты" .-> testing
 ```
 
 ## 2. Что работает на странице
@@ -77,11 +86,14 @@ flowchart LR
   subgraph page["Страница браузера"]
     direction TB
     subgraph hostbox["Хост"]
-      cfg["platform.config.json<br/><small>remotes, nav, overview</small>"]
+      cfg["platform.config.json<br/><small>читается при запуске:<br/>remotes, nav, overview</small>"]
+      ovr["?mfe-override<br/><small>подмена адреса,<br/>только localhost</small>"]
+      links["interceptLinks<br/><small>ссылки + предзагрузка</small>"]
       router["HostRouter<br/><small>единственный владелец history</small>"]
       store["Store#lt;PlatformState#gt;<br/><small>session, selected, theme, locale</small>"]
       loader["FederationLoader"]
       tr["Транспорты<br/><small>console + memory → mfe.events()</small>"]
+      dt["@mfe/devtools<br/><small>Alt+Shift+D</small>"]
     end
 
     subgraph outlets["#lt;mfe-outlet#gt; × N"]
@@ -98,7 +110,8 @@ flowchart LR
     reg{{"globalThis[mfe-platform.registry]<br/><small>учёт китов и постфиксов</small>"}}
   end
 
-  cfg --> loader
+  s0 -- "platform.config.json" --> cfg
+  cfg --> ovr --> loader
   loader -- "./manifest, ./entry" --> s1 & s2 & s3
   router -- "remote, basename" --> o1 & o2 & o3
   store -- "props.platform" --> o1 & o2 & o3
@@ -106,6 +119,10 @@ flowchart LR
   o2 --> e2
   o3 --> e3
   o1 & o2 & o3 -- "события монтирования" --> tr
+  tr --> dt
+  links -- "navigate()" --> router
+  links -- "loadModule() при наведении" --> loader
+  e1 & e2 & e3 -- "клик по #lt;a href#gt;" --> links
 
   e1 & e2 -- "useKit()" --> reg
   reg -- "register:*" --> tr
@@ -121,6 +138,7 @@ flowchart LR
 | хост → ремоут | атрибут `basename` | префикс маршрутов ремоута |
 | хост → ремоут | свойство `platform` | `PlatformState` целиком, при каждом изменении стора |
 | ремоут → хост | `CustomEvent("platform:navigate")` | просьба перейти на чужой маршрут |
+| ремоут → хост | обычная ссылка `<a href>` | переход через роутер хоста, без перезагрузки |
 | ремоут → хост | шина, `store:patch` | просьба изменить общее состояние |
 | ремоут ↔ ремоут | шина, свои темы (`account:selected`, …) | доменные события |
 | ремоут → реестр | `useKit()` | регистрация кита, получение постфикса |
@@ -144,18 +162,25 @@ sequenceDiagram
   participant O as mfe-outlet
 
   B->>H: загрузка index
-  H->>L: registerRemotes(platform.config.remotes)
+  H->>B: fetch /platform.config.json (no-cache)
+  Note over H: Нет файла или он невалиден →<br/>сообщение об ошибке вместо пустой страницы
+  H->>H: applyRemoteOverrides(remotes) — ?mfe-override
+  H->>L: registerRemotes(remotes)
   par для каждого ремоута
     H->>L: loadManifest(name)
     L->>R: mf-manifest.json + ./manifest
     R-->>L: { name, tag, routes, requires, extra }
   end
-  Note over H: Упавший манифест логируется и пропускается,<br/>остальные работают
+  Note over H: Упавший или невалидный манифест логируется<br/>и пропускается, остальные работают
   H->>Rt: createRouteTable(manifests), start()
+  H->>H: interceptLinks({ router, prefetch })
   Rt->>H: onRoute(match, path)
   H->>O: basename = "/payments", remote = "payments"
   Note over O: дальше — монтирование (раздел 4)
 ```
+
+Наведение или фокус на ссылке вызывает `prefetch(path)`: код ремоута загружается заранее, и
+переход по ссылке берёт его из кеша загрузчика.
 
 ## 4. Монтирование ремоута в `<mfe-outlet>`
 
@@ -202,7 +227,7 @@ stateDiagram-v2
   loading --> denied: политика запретила
   loading --> error: загрузка, контракт, register() или render упали
   ready --> loading: сменили remote
-  error --> loading: сменили remote / повторный заход
+  error --> loading: retry() или новый remote
   denied --> loading: сменили remote
   ready --> idle: remote снят
   error --> idle: remote снят
@@ -211,6 +236,10 @@ stateDiagram-v2
 
 Если `remote` меняется во время загрузки, ответ старой загрузки отбрасывается
 (счётчик `generation`), поэтому быстрая навигация не монтирует не тот ремоут.
+
+После ошибки fallback получает `retry`, а у outlet есть метод `retry()`: загрузка
+повторяется с новым `mountId`. Загрузчик не кеширует упавшие загрузки, поэтому повтор
+действительно идёт в сеть.
 
 ## 5. Сценарий: три демо-ремоута взаимодействуют
 
@@ -309,26 +338,30 @@ flowchart LR
 
 ## 8. Подключение нового ремоута
 
-Код хоста не меняется — только конфигурация.
+Код хоста и его сборка не меняются — только JSON-файл конфигурации.
 
 ```mermaid
 flowchart TB
   subgraph team["Команда ремоута"]
+    a0["bun run create:remote cards<br/>--template vanilla | rwc | react"]
     a1["manifest.ts<br/>name, tag, routes, requires, extra"]
     a2["entry.ts<br/>manifest + идемпотентная register()"]
-    a3["rsbuild.config.ts<br/>defineRemoteConfig({ name, port, kits })"]
+    a3["test/contract.test.ts<br/>checkRemote из @mfe/testing"]
+    a5["разработка в стенде:<br/>?mfe-override=cards=http://localhost:3004/…"]
     a4["деплой → mf-manifest.json по адресу"]
-    a1 --> a2 --> a3 --> a4
+    a0 --> a1 --> a2 --> a3 --> a5 --> a4
   end
 
   subgraph platform["Хост"]
-    b1["platform.config.json<br/>remotes += { name, entry }<br/>nav / overview — по желанию"]
-    b2["таблица маршрутов строится<br/>из нового манифеста при старте"]
+    b1["public/platform.config.json<br/>remotes += { name, entry }<br/>nav / overview — по желанию"]
+    b2["при следующем запуске страницы<br/>таблица маршрутов строится<br/>из нового манифеста"]
     b1 --> b2
   end
 
   a4 --> b1
 ```
+
+Подробно о генераторе, тестах, подмене и панели отладки — [development.md](development.md).
 
 ## 9. Принципы и решения
 
@@ -343,8 +376,12 @@ flowchart TB
 **Имена тегов строит кит, а не платформа.** Реестр выбирает постфикс, ведёт учёт и применяет
 политики; второго места, где склеивается имя тега, нет (это проверяет тест).
 
-**Ядро не зависит от UI-фреймворков и не ходит в сеть.** Единственные запросы — за кодом
-ремоутов по адресам из конфигурации.
+**Ядро не зависит от UI-фреймворков и не ходит в сеть.** Единственные запросы — за
+конфигурацией и кодом ремоутов по адресам из конфигурации.
+
+**Имя ремоута — JS-идентификатор.** Оно же имя контейнера Module Federation, а MF требует
+идентификатор: `credit_cards`, не `credit-cards`. `validateManifest` и проверка
+конфигурации отклоняют другие имена.
 
 ### Почему ремоуты ничего не шарят
 
@@ -372,6 +409,20 @@ Federation (около 118 KB), а не фреймворк. `provide`/`inject` �
 Приходят в составе `PlatformState` свойством `platform`, отдельных атрибутов нет: один
 канал, типизированный, и значение есть уже при первой отрисовке. Для CSS хост дополнительно
 ставит `data-theme` на `<html>`.
+
+### Подмена ремоута только на локальные адреса
+
+`?mfe-override` грузит на страницу код по адресу из URL. Если разрешить любой адрес, ссылка
+с параметром станет способом выполнить чужой код в контексте хоста. Поэтому по умолчанию
+разрешены только `localhost`, `127.0.0.1` и `[::1]`: подмена полезна разработчику на его
+машине и бесполезна атакующему. Хост может расширить список (например, адресами стенда).
+
+### Перехват ссылок
+
+Хост перехватывает клики по `<a>` на `document`, после обработчиков ремоутов. Если роутер
+ремоута уже обработал ссылку (`preventDefault`), хост её не трогает. Ссылки, которые должны
+перезагрузить страницу (скачивание, другое приложение на том же домене), помечаются
+`rel="external"` или `data-mfe-reload`.
 
 ### Shadow DOM у `<mfe-outlet>`
 

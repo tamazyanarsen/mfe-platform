@@ -1,5 +1,7 @@
 # Контракт ремоута
 
+[English](en/contract.md) · Русский
+
 Версия контракта: `CONTRACT_VERSION = 1` (`@mfe/contract`). Контракт не знает ни о rwc, ни
 о React, ни о сборщике.
 
@@ -16,7 +18,7 @@
 ```ts
 export interface RemoteManifest {
   readonly contractVersion: number;  // CONTRACT_VERSION, с которой собран ремоут
-  readonly name: string;             // имя контейнера MF: "accounts"
+  readonly name: string;             // имя контейнера MF, JS-идентификатор: "accounts"
   readonly version?: string;         // версия сборки ремоута, для наблюдаемости
   readonly tag: string;              // фактический тег элемента
   readonly routes: readonly string[];// "/accounts" и "/accounts/*"
@@ -30,6 +32,8 @@ export interface RemoteModule {
 }
 ```
 
+- **`name` — JS-идентификатор** (`credit_cards`, не `credit-cards`): это и имя контейнера
+  Module Federation, а MF требует идентификатор.
 - **`register()` идемпотентна.** Второй вызов — no-op, не исключение. После неё
   `customElements.get(manifest.tag)` должен вернуть класс.
 - **`tag` в `./manifest` и в `./entry` совпадает** — иначе хост показывает ошибку.
@@ -58,6 +62,13 @@ outlet) и передаёт ему:
 - Внутри своего `basename` ремоут навигирует своим роутером.
 - На чужой маршрут — событием: `element.dispatchEvent(navigateEvent("/payments/new"))`
   (тип `platform:navigate`, `detail: { to, replace? }`).
+
+- Обычная ссылка `<a href="/payments">` тоже работает: хост перехватывает клик и переходит
+  без перезагрузки, в том числе по ссылке внутри shadow DOM. Ссылку, которую уже обработал
+  роутер ремоута (`preventDefault`), хост не трогает. Полная перезагрузка — `rel="external"`
+  или `data-mfe-reload`.
+- Наружу хост переходит только по `http(s)`: `javascript:` и `data:` в `platform:navigate`
+  блокируются.
 
 Хост замечает `pushState`/`replaceState` роутеров ремоутов и пересчитывает маршрут, а после
 своей навигации рассылает `popstate`, чтобы роутеры ремоутов увидели новый адрес.
@@ -102,3 +113,12 @@ useKit({ name: "@rwcjs/ui", version: "0.2.0", consumer: manifest.name, kit: ui, 
 и событием `mfe-outlet-state`. Ошибки загрузки и исключения при отрисовке остаются внутри
 outlet: показывается fallback, событие `mount:error` уходит в транспорт с полями `name`,
 `version`, `mountId`, `route`, `contractVersion`, `extra`, `details.phase`.
+
+После ошибки `outlet.retry()` загружает ремоут заново; тот же вызов получает fallback как
+`retry` в `FallbackContext` — хост рисует по нему кнопку «Повторить».
+
+## Проверка контракта
+
+`checkRemote` из `@mfe/testing` проверяет ремоут так же, как хост, — без хоста и сети:
+манифест, согласие `./manifest` и `./entry`, версию контракта, идемпотентность `register()`
+и монтирование в настоящий `<mfe-outlet>`. Подробно — [development.md](development.md#тест-контракта-mfetesting).

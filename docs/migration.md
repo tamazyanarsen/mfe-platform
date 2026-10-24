@@ -1,5 +1,7 @@
 # Перевод существующей сборки Module Federation на контракт
 
+[English](en/migration.md) · Русский
+
 Типичная исходная точка: хост на Module Federation со статическими `remotes`, ремоуты
 экспонируют компоненты фреймворка, хост монтирует их сам (часто через `bridge-react`).
 
@@ -75,7 +77,18 @@ createHostRouter({
 ```
 
 Статические `remotes` в конфиге сборки хоста больше не нужны: ремоуты регистрируются в
-рантайме, адреса — в конфигурации хоста.
+рантайме, адреса — в конфигурации хоста. Удобнее держать её в JSON-файле рядом с хостом и
+читать при запуске — тогда новый адрес не требует пересборки:
+
+```ts
+import { loadJsonConfig, type RemoteEntry, validateRemoteEntries } from "@mfe/host-runtime";
+
+const remotes = await loadJsonConfig<RemoteEntry[]>("/remotes.json", validateRemoteEntries);
+registerRemotes(remotes);
+```
+
+Имя ремоута — имя контейнера MF, JS-идентификатор: если старые контейнеры называются через
+дефис, переименуйте их до перевода.
 
 ## 4. Shared-зависимости
 
@@ -85,7 +98,23 @@ createHostRouter({
 React Context) — через границу ремоутов он работает только с общей копией. Общее состояние
 переносится в стор хоста и свойство `platform`. Цифры — в [architecture.md](architecture.md#почему-ремоуты-ничего-не-шарят).
 
-## 5. Удалить старое
+## 5. Проверить ремоут
+
+Добавьте в CI ремоута тест контракта — он ловит расхождения до того, как их увидит хост:
+
+```ts
+import { checkRemote } from "@mfe/testing";
+import * as entry from "../src/entry";
+import { manifest } from "../src/manifest";
+
+expect(await checkRemote(entry, { manifest })).toEqual([]);
+```
+
+Во время перевода удобно подставить переведённый ремоут в работающий стенд:
+`?mfe-override=billing=http://localhost:3005/mf-manifest.json` — подробно в
+[development.md](development.md#подмена-ремоута).
+
+## 6. Удалить старое
 
 Когда хост монтирует все ремоуты через `<mfe-outlet>`, уберите старые `exposes` и
 `bridge-react`.
