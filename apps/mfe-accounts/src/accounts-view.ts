@@ -1,4 +1,4 @@
-import { navigateEvent, type PlatformState } from "@mfe-platform/contract";
+import { navigateEvent, type PlatformState, pathInBasename } from "@mfe-platform/contract";
 import {
   configCustomComponent,
   css,
@@ -55,77 +55,79 @@ class AccountsView extends defineComponent({
     const topUp = signal("");
 
     // basename читается при подключении: outlet выставляет его до вставки элемента.
-    const router = createRouter(
-      {
-        "/": (): HTMLElement =>
-          div(
-            div(
-              { class: "title" },
-              h2("Счета"),
-              rwcBadge(
-                { ".variant": "accent", attrs: { "data-testid": "kit-version" } },
-                `kit ${KIT_VERSION}`,
-              ),
-            ),
-            ul(
-              {},
-              each(
-                () => ACCOUNTS,
-                (account): HTMLElement =>
-                  li(
-                    {
-                      attrs: { "data-testid": "account" },
-                      // Выбранный счёт приходит из общего стора хоста свойством platform.
-                      class: {
-                        selected: () => this.props.platform()?.selected?.accountId === account().id,
-                      },
-                    },
-                    router.link({ to: `/${account.peek().id}` }, () => account().title),
-                    span({ class: "balance" }, () => `${account().balance} ${account().currency}`),
-                    rwcButton(
-                      {
-                        ".size": "sm",
-                        "@press": () =>
-                          bus.publish("account:selected", {
-                            accountId: account.peek().id,
-                            title: account.peek().title,
-                          }),
-                      },
-                      "Выбрать",
-                    ),
-                  ),
-                (account) => account.id,
-              ),
-            ),
-            div(
-              { class: "actions" },
-              rwcTooltip(
-                {},
-                // Чужой маршрут: просим хост, историю сами не трогаем.
+    const basename = this.props.basename.peek();
+    const home = (): HTMLElement =>
+      div(
+        div(
+          { class: "title" },
+          h2("Счета"),
+          rwcBadge(
+            { ".variant": "accent", attrs: { "data-testid": "kit-version" } },
+            `kit ${KIT_VERSION}`,
+          ),
+        ),
+        ul(
+          {},
+          each(
+            () => ACCOUNTS,
+            (account): HTMLElement =>
+              li(
+                {
+                  attrs: { "data-testid": "account" },
+                  // Выбранный счёт приходит из общего стора хоста свойством platform.
+                  class: {
+                    selected: () => this.props.platform()?.selected?.accountId === account().id,
+                  },
+                },
+                router.link({ to: `/${account.peek().id}` }, () => account().title),
+                span({ class: "balance" }, () => `${account().balance} ${account().currency}`),
                 rwcButton(
                   {
-                    ".variant": "primary",
-                    "@press": () => this.dispatchEvent(navigateEvent("/payments/new")),
+                    ".size": "sm",
+                    "@press": () =>
+                      bus.publish("account:selected", {
+                        accountId: account.peek().id,
+                        title: account.peek().title,
+                      }),
                   },
-                  "Новый платёж",
+                  "Выбрать",
                 ),
-                span({ attrs: { slot: "content" } }, "Перевод в разделе платежей"),
               ),
-            ),
-            h3("Пополнение"),
-            form(
-              {
-                attrs: { "data-testid": "accounts-form" },
-                "@submit": (event) => {
-                  event.preventDefault();
-                  topUp.set(formEntries(event.currentTarget));
-                },
-              },
-              rwcInput({ attrs: { name: "amount" }, ".placeholder": "Сумма" }),
-              rwcButton({ ".type": "submit" }, "Пополнить"),
-            ),
-            output({ attrs: { "data-testid": "accounts-form-result" } }, topUp),
+            (account) => account.id,
           ),
+        ),
+        div(
+          { class: "actions" },
+          rwcTooltip(
+            {},
+            // Чужой маршрут: просим хост, историю сами не трогаем.
+            rwcButton(
+              {
+                ".variant": "primary",
+                "@press": () => this.dispatchEvent(navigateEvent("/payments/new")),
+              },
+              "Новый платёж",
+            ),
+            span({ attrs: { slot: "content" } }, "Перевод в разделе платежей"),
+          ),
+        ),
+        h3("Пополнение"),
+        form(
+          {
+            attrs: { "data-testid": "accounts-form" },
+            "@submit": (event) => {
+              event.preventDefault();
+              topUp.set(formEntries(event.currentTarget));
+            },
+          },
+          rwcInput({ attrs: { name: "amount" }, ".placeholder": "Сумма" }),
+          rwcButton({ ".type": "submit" }, "Пополнить"),
+        ),
+        output({ attrs: { "data-testid": "accounts-form-result" } }, topUp),
+      );
+    const router = createRouter(
+      {
+        "/": home,
         "/:id": ({ params }): HTMLElement => {
           const account = () => ACCOUNTS.find((a) => a.id === params().id);
           return div(
@@ -137,10 +139,12 @@ class AccountsView extends defineComponent({
         },
         "*": () => p("Раздел счетов не найден"),
       },
-      { base: this.props.basename.peek() },
+      { base: basename },
     );
     onMount(() => () => router.dispose());
-    return router.view();
+    // Адрес вне basename — ремоут показан не на своей странице (обзор хоста): стартовая
+    // страница, а не чужой путь, сопоставленный маршрутам ремоута.
+    return pathInBasename(basename) === null ? home() : router.view();
   }
 }
 

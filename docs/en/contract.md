@@ -60,6 +60,12 @@ Output is a `CustomEvent` with `bubbles: true, composed: true`.
 Only the host writes browser history.
 
 - Within its own `basename` a remote navigates with its own router.
+- The URL may be outside `basename`: the host shows the remote off its own page (the overview).
+  Then the remote shows its start page instead of matching a foreign path against its routes:
+  `pathInBasename(basename)` from `@mfe-platform/contract` returns `null`.
+- Manifest routes and `navigateEvent` take application paths (`/payments`). If the host is
+  deployed under a prefix (`bank.ru/business/`), the host adds the prefix, and the remote's
+  `basename` already contains it (`/business/payments`).
 - For another remote's route — with an event: `element.dispatchEvent(navigateEvent("/payments/new"))`
   (type `platform:navigate`, `detail: { to, replace? }`).
 

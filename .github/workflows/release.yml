@@ -1,0 +1,33 @@
+name: release
+
+# Публикация пакетов в npm по тегу: git tag v0.1.0 && git push origin v0.1.0.
+# Нужен секрет NPM_TOKEN: granular access token с правом публикации в scope @mfe-platform.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  # provenance: npm связывает опубликованный пакет с этим workflow и коммитом.
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: bun install --frozen-lockfile
+      - name: Тег совпадает с версией пакетов
+        run: |
+          version=$(node -p "require('./packages/contract/package.json').version")
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != v$version"; exit 1; }
+      - run: bun run ci
+      - run: bun run check:packages
+      - run: bun run packages:publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

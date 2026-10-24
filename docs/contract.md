@@ -60,6 +60,12 @@ outlet) и передаёт ему:
 Историю браузера пишет только хост.
 
 - Внутри своего `basename` ремоут навигирует своим роутером.
+- Адрес может быть вне `basename`: хост показывает ремоут не на его странице (обзор). Тогда
+  ремоут показывает стартовую страницу, а не сопоставляет чужой путь своим маршрутам:
+  `pathInBasename(basename)` из `@mfe-platform/contract` возвращает `null`.
+- Маршруты манифеста и `navigateEvent` — пути приложения (`/payments`). Если хост развёрнут
+  под префиксом (`bank.ru/business/`), префикс добавляет хост, а `basename` ремоута уже
+  содержит его (`/business/payments`).
 - На чужой маршрут — событием: `element.dispatchEvent(navigateEvent("/payments/new"))`
   (тип `platform:navigate`, `detail: { to, replace? }`).
 

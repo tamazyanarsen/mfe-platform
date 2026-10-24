@@ -1,5 +1,5 @@
 import { subscribeInRender } from "@mfe-platform/adapter-rwc";
-import { navigateEvent, type PlatformState } from "@mfe-platform/contract";
+import { navigateEvent, type PlatformState, pathInBasename } from "@mfe-platform/contract";
 import {
   configCustomComponent,
   css,
@@ -55,55 +55,57 @@ class PaymentsView extends defineComponent({
     // Разовое уведомление из шины; подписка умирает вместе с компонентом.
     subscribeInRender(bus, "account:selected", ({ title }) => notice.set(`Выбран счёт: ${title}`));
 
+    const basename = this.props.basename.peek();
+    const home = () =>
+      div(
+        div(
+          { class: "title" },
+          h2("Платежи"),
+          rwcBadge(
+            { ".variant": "accent", attrs: { "data-testid": "kit-version" } },
+            `kit ${KIT_VERSION}`,
+          ),
+        ),
+        ul(
+          {},
+          each(
+            () => PAYMENTS,
+            (payment) =>
+              li(
+                { attrs: { "data-testid": "payment" } },
+                span(() => payment().to),
+                span(() => `${payment().amount} RUB`),
+              ),
+            (payment) => payment.id,
+          ),
+        ),
+        h3("Быстрый платёж"),
+        p(
+          { attrs: { "data-testid": "debit-account" } },
+          () => `Счёт списания: ${this.props.platform()?.selected?.title ?? "не выбран"}`,
+        ),
+        form(
+          {
+            attrs: { "data-testid": "payments-form" },
+            "@submit": (event) => {
+              event.preventDefault();
+              quick.set(formEntries(event.currentTarget));
+            },
+          },
+          rwcInput({ attrs: { name: "amount" }, ".placeholder": "Сумма" }),
+          rwcInput({ attrs: { name: "to" }, ".placeholder": "Получатель" }),
+          rwcButton({ ".type": "submit", ".variant": "primary" }, "Отправить"),
+        ),
+        output({ attrs: { "data-testid": "payments-form-result" } }, quick),
+      );
     const router = createRouter(
       {
-        "/": () =>
-          div(
-            div(
-              { class: "title" },
-              h2("Платежи"),
-              rwcBadge(
-                { ".variant": "accent", attrs: { "data-testid": "kit-version" } },
-                `kit ${KIT_VERSION}`,
-              ),
-            ),
-            ul(
-              {},
-              each(
-                () => PAYMENTS,
-                (payment) =>
-                  li(
-                    { attrs: { "data-testid": "payment" } },
-                    span(() => payment().to),
-                    span(() => `${payment().amount} RUB`),
-                  ),
-                (payment) => payment.id,
-              ),
-            ),
-            h3("Быстрый платёж"),
-            p(
-              { attrs: { "data-testid": "debit-account" } },
-              () => `Счёт списания: ${this.props.platform()?.selected?.title ?? "не выбран"}`,
-            ),
-            form(
-              {
-                attrs: { "data-testid": "payments-form" },
-                "@submit": (event) => {
-                  event.preventDefault();
-                  quick.set(formEntries(event.currentTarget));
-                },
-              },
-              rwcInput({ attrs: { name: "amount" }, ".placeholder": "Сумма" }),
-              rwcInput({ attrs: { name: "to" }, ".placeholder": "Получатель" }),
-              rwcButton({ ".type": "submit", ".variant": "primary" }, "Отправить"),
-            ),
-            output({ attrs: { "data-testid": "payments-form-result" } }, quick),
-          ),
+        "/": home,
         "/new": () =>
           div({ attrs: { "data-testid": "payment-form" } }, h2("Новый платёж"), p("Форма платежа")),
         "*": () => p("Раздел платежей не найден"),
       },
-      { base: this.props.basename.peek() },
+      { base: basename },
     );
     onMount(() => () => router.dispose());
 
@@ -124,7 +126,9 @@ class PaymentsView extends defineComponent({
         ),
       ),
       p({ attrs: { "aria-live": "polite", "data-testid": "payments-notice" } }, notice),
-      router.view(),
+      // Адрес вне basename — ремоут показан не на своей странице (обзор хоста): стартовая
+      // страница, а не чужой путь, сопоставленный маршрутам ремоута.
+      pathInBasename(basename) === null ? home() : router.view(),
     ];
   }
 }

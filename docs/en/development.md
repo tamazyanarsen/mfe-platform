@@ -244,3 +244,42 @@ There is no singleton: each remote has its own copy of incompatible versions. Wi
 `bun run test:e2e:prod` builds everything and runs `e2e-prod/` on preview servers: integrity,
 the shared kit, the shared runtime — what dev does not have. `apps/mfe-probe` is a test remote on the same
 kit line as payments; it is not in the host configuration, the tests plug it in with an override.
+
+## Deployment: path prefix and file URLs
+
+**A host not at the site root.** The host is built with `server.base` from the `MFE_BASE`
+variable: `MFE_BASE=/business/ bun run --cwd apps/host build`. The host router
+(`createHostRouter({ base })`) strips the prefix from the URL and adds it on navigation, so
+manifests, the navigation in the configuration and `navigateEvent` stay application paths. The
+host loads `platform.config.json` next to itself, under the same prefix.
+
+**Remote file URLs.** The production build of a remote uses `publicPath: "auto"` by default: the
+Module Federation runtime takes the URL of the directory that holds `mf-manifest.json`. The same
+build works on any CDN and under any path — only `entry` changes in the host configuration. An
+explicit URL — the `publicPath` option of `defineRemoteConfig` or the `MFE_PUBLIC_PATH` variable.
+
+## Demo
+
+`bun run build:demo` builds a static site into `.demo/`: the host under the `MFE_DEMO_BASE`
+prefix (`/mfe-platform/` by default), remotes in `remotes/<name>/`, a configuration with
+integrity hashes for all remotes and `404.html` for direct links to sections. The `demo`
+workflow deploys it to GitHub Pages on every push to `main`. Locally — `bun run serve:demo`
+(responds like GitHub Pages), tests — `bun run test:e2e:demo`.
+
+## Packages and release
+
+In the repository the packages export TypeScript sources. For npm they are built by
+`bun run packages:pack`: `.npm/<package>` gets JS, types and a `package.json` with `workspace:*`
+replaced by the release version, the tarballs go to `.npm/tarballs`. `bun run check:packages`
+installs the tarballs into a clean project and checks that every import is declared in the
+dependencies, the types pass tsc and the code bundles.
+
+Release:
+
+1. Bump the version in all `packages/*/package.json` (it is the same for all) and record the
+   changes in `CHANGELOG.md`.
+2. `git tag v0.1.0 && git push origin v0.1.0`. The `release` workflow checks that the tag matches
+   the version, runs CI and publishes the packages with provenance. It needs an `NPM_TOKEN`
+   secret allowed to publish to the `@mfe-platform` scope.
+
+To check publishing without sending anything — `bun run packages:publish --dry-run`.

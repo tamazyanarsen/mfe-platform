@@ -9,23 +9,29 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      # Границы пакетов: ядро не знает о фреймворках и адаптерах.
+      # Границы пакетов: ядро не знает о фреймворках, адаптерах и сборке.
       - run: bun run check:boundaries
       - run: bun run lint
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
       - run: bun run check:size
+      # Пакеты для npm: собираются, ставятся в чистый проект, типы и импорты сходятся.
+      - run: bun run check:packages
       # Шаблоны create:remote: генерируются, проходят тест контракта и собираются.
       - run: bun run check:templates
       - run: bunx playwright install --with-deps chromium
       - run: bun run test:e2e
         env:
           CI: "true"
-      # Production-сборка: SRI и запечатанные манифесты ремоутов.
+      # Production-сборка: запечатанные манифесты, общий рантайм MF.
       - run: bunx playwright test -c playwright.prod.config.ts
+        env:
+          CI: "true"
+      # Демо как на GitHub Pages: хост под префиксом пути, ремоуты рядом.
+      - run: bun run test:e2e:demo
         env:
           CI: "true"

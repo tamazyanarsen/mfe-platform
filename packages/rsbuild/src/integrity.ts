@@ -20,7 +20,7 @@ import type { RsbuildPlugin } from "@rsbuild/core";
 export const INTEGRITY_FILE = "mf-manifest.json.integrity";
 
 export const sri = (
-  content: Buffer | string,
+  content: Uint8Array | string,
   algorithm: "sha256" | "sha384" | "sha512" = "sha384",
 ) => `${algorithm}-${createHash(algorithm).update(content).digest("base64")}`;
 

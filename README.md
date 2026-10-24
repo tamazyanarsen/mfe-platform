@@ -2,6 +2,12 @@
 
 [English](README.en.md) · Русский
 
+[![ci](https://github.com/tamazyanarsen/mfe-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/tamazyanarsen/mfe-platform/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
+**Демо:** <https://tamazyanarsen.github.io/mfe-platform/> — два ремоута на разных версиях UI-кита рядом, ремоут на React,
+проверка целостности включена. Панель отладки — [`?mfe-devtools`](https://tamazyanarsen.github.io/mfe-platform/?mfe-devtools).
+
 Платформа для приложений из многих независимых микрофронтендов: каждый ремоут деплоится
 отдельно, команды обновляют версии независимо, хост собирает их в одно приложение.
 
@@ -41,6 +47,27 @@
 монтирования и регистрации), `PolicyHook` (запрет монтирования или регистрации версии кита)
 и `manifest.extra` (произвольные метаданные ремоута). Подробно — [docs/contract.md](docs/contract.md).
 
+## Пакеты
+
+Пакеты публикуются в npm в scope `@mfe-platform`, версия у всех одна.
+
+| Пакет | Где | Что |
+| --- | --- | --- |
+| `@mfe-platform/host-runtime` | хост | `<mfe-outlet>`, роутер, загрузчик, конфигурация, целостность |
+| `@mfe-platform/registry` | хост, ремоуты | версионированная регистрация тегов кита |
+| `@mfe-platform/bus` | хост, ремоуты | типизированная шина и стор |
+| `@mfe-platform/contract` | ремоуты | манифест, навигация, темы шины |
+| `@mfe-platform/adapter-rwc`, `@mfe-platform/adapter-react` | ремоуты | адаптеры фреймворков |
+| `@mfe-platform/rsbuild` | сборка ремоута | `defineRemoteConfig`: экспозиции, общие модули, хеши целостности |
+| `@mfe-platform/testing` | тесты ремоута | `mountRemote`, `checkRemote` без хоста |
+| `@mfe-platform/devtools` | хост | панель отладки |
+
+```bash
+bun add @mfe-platform/host-runtime @mfe-platform/registry @mfe-platform/bus   # хост
+bun add @mfe-platform/contract @mfe-platform/adapter-rwc                      # ремоут на rwc
+bun add -d @mfe-platform/rsbuild @mfe-platform/testing                        # его сборка и тесты
+```
+
 ## Быстрый старт
 
 Нужны [bun](https://bun.sh) 1.4+ и Node.js 20.19+ или 22.12+ (требование Rsbuild).
@@ -74,6 +101,8 @@ bun run check:templates             # шаблоны create:remote генери�
 bunx playwright install chromium    # один раз
 bun run test:e2e                    # сквозные тесты стенда (dev)
 bun run test:e2e:prod               # production-сборка: целостность, общий кит и рантайм
+bun run check:packages              # пакеты для npm ставятся в чистый проект и сходятся по типам
+bun run test:e2e:demo               # демо как на GitHub Pages: хост под префиксом пути
 ```
 
 ## Структура
@@ -116,7 +145,7 @@ docs/                 архитектура, контракт, разработ
 - [docs/comparison.md](docs/comparison.md) — чем платформа отличается от обычной схемы «React-хост + MF»: плюсы, цена, когда что выбирать
 - [docs/architecture.md](docs/architecture.md) — схемы: пакеты, страница, монтирование, взаимодействие ремоутов
 - [docs/contract.md](docs/contract.md) — контракт ремоута
-- [docs/development.md](docs/development.md) — новый ремоут, тесты, подмена, панель отладки, целостность, права на стор, бюджет размера
+- [docs/development.md](docs/development.md) — новый ремоут, тесты, подмена, панель отладки, целостность, права на стор, бюджет размера, выкладка и релиз пакетов
 - [docs/migration.md](docs/migration.md) — перевод существующей MF-сборки
 
 ## Лицензия

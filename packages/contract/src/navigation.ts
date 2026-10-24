@@ -20,3 +20,15 @@ export const navigateEvent = (to: string, options: { replace?: boolean } = {}) =
 
 /** Атрибут, которым хост передаёт ремоуту префикс его маршрутов. */
 export const BASENAME_ATTRIBUTE = "basename";
+
+/**
+ * Путь внутри маршрутов ремоута: "/accounts/42" при basename "/accounts" → "/42". null —
+ * адрес вне basename: так бывает, когда хост показывает ремоут не на его странице (обзор).
+ * Тогда ремоут показывает стартовую страницу, а не сопоставляет чужой путь своим маршрутам.
+ */
+export const pathInBasename = (basename: string, pathname = location.pathname): string | null => {
+  const base = basename.replace(/\/+$/, "");
+  if (base === "") return pathname;
+  if (pathname !== base && !pathname.startsWith(`${base}/`)) return null;
+  return pathname.slice(base.length) || "/";
+};

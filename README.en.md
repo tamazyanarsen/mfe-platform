@@ -2,6 +2,12 @@
 
 English · [Русский](README.md)
 
+[![ci](https://github.com/tamazyanarsen/mfe-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/tamazyanarsen/mfe-platform/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
+**Demo:** <https://tamazyanarsen.github.io/mfe-platform/> — two remotes on different UI kit versions side by side, a React remote,
+integrity checks on. Debug panel — [`?mfe-devtools`](https://tamazyanarsen.github.io/mfe-platform/?mfe-devtools).
+
 A platform for applications built from many independent micro-frontends: each remote is deployed
 separately, teams update versions independently, and the host assembles them into one application.
 
@@ -41,6 +47,27 @@ The core is extended without a fork through three points: `ObservabilityTranspor
 and registration events go), `PolicyHook` (denying a mount or the registration of a kit version)
 and `manifest.extra` (arbitrary remote metadata). Details — [docs/en/contract.md](docs/en/contract.md).
 
+## Packages
+
+The packages are published to npm under the `@mfe-platform` scope, all with one version.
+
+| Package | Where | What |
+| --- | --- | --- |
+| `@mfe-platform/host-runtime` | host | `<mfe-outlet>`, router, loader, configuration, integrity |
+| `@mfe-platform/registry` | host, remotes | versioned registration of kit tags |
+| `@mfe-platform/bus` | host, remotes | typed bus and store |
+| `@mfe-platform/contract` | remotes | manifest, navigation, bus topics |
+| `@mfe-platform/adapter-rwc`, `@mfe-platform/adapter-react` | remotes | framework adapters |
+| `@mfe-platform/rsbuild` | remote build | `defineRemoteConfig`: exposes, shared modules, integrity hashes |
+| `@mfe-platform/testing` | remote tests | `mountRemote`, `checkRemote` without a host |
+| `@mfe-platform/devtools` | host | debug panel |
+
+```bash
+bun add @mfe-platform/host-runtime @mfe-platform/registry @mfe-platform/bus   # host
+bun add @mfe-platform/contract @mfe-platform/adapter-rwc                      # an rwc remote
+bun add -d @mfe-platform/rsbuild @mfe-platform/testing                        # its build and tests
+```
+
 ## Quick start
 
 You need [bun](https://bun.sh) 1.4+ and Node.js 20.19+ or 22.12+ (a Rsbuild requirement).
@@ -74,6 +101,8 @@ bun run check:templates             # create:remote templates are generated, tes
 bunx playwright install chromium    # once
 bun run test:e2e                    # end-to-end tests of the demo setup (dev)
 bun run test:e2e:prod               # production build: integrity, shared kit and runtime
+bun run check:packages              # npm packages install into a clean project and typecheck
+bun run test:e2e:demo               # the demo as on GitHub Pages: the host under a path prefix
 ```
 
 ## Structure
@@ -116,7 +145,7 @@ Moving an existing Module Federation setup to the contract — [docs/en/migratio
 - [docs/en/comparison.md](docs/en/comparison.md) — how the platform differs from the usual "React host + MF" setup: benefits, costs, when to choose what
 - [docs/en/architecture.md](docs/en/architecture.md) — diagrams: packages, the page, mounting, remote interaction
 - [docs/en/contract.md](docs/en/contract.md) — the remote contract
-- [docs/en/development.md](docs/en/development.md) — new remote, tests, override, debug panel, integrity, store permissions, size budget
+- [docs/en/development.md](docs/en/development.md) — new remote, tests, override, debug panel, integrity, store permissions, size budget, deployment and package release
 - [docs/en/migration.md](docs/en/migration.md) — migrating an existing MF setup
 
 ## License

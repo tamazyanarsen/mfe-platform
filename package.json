@@ -20,6 +20,12 @@
     "ci": "bun run check:boundaries && bun run lint && bun run typecheck && bun run test && bun run build && bun run check:size",
     "check:templates": "bun run scripts/check-templates.ts",
     "check:size": "bun run scripts/check-size.ts",
+    "packages:pack": "bun run scripts/packages.ts pack",
+    "packages:publish": "bun run scripts/packages.ts publish",
+    "check:packages": "bun run scripts/check-packages.ts",
+    "build:demo": "bun run scripts/build-demo.ts",
+    "serve:demo": "bun run scripts/serve-demo.ts",
+    "test:e2e:demo": "bun run build:demo && playwright test -c playwright.demo.config.ts",
     "test:e2e:prod": "bun run build && playwright test -c playwright.prod.config.ts"
   },
   "devDependencies": {

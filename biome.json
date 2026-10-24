@@ -4,6 +4,8 @@
     "includes": [
       "**",
       "!**/dist",
+      "!**/.npm",
+      "!**/.demo",
       "!**/node_modules",
       "!**/test-results",
       "!**/playwright-report",
