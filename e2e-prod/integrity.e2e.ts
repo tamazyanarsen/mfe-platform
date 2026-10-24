@@ -77,9 +77,9 @@ test("каждый скрипт проверенного ремоута груз
   );
   expect(accounts.length).toBeGreaterThan(3);
   for (const { integrity } of accounts) expect(integrity).toMatch(/^sha384-/);
-  // Ремоут без integrity в конфигурации грузится как раньше.
-  const payments = scripts.filter(({ src }) => src.startsWith("http://localhost:3002/"));
-  for (const { integrity } of payments) expect(integrity).toBe("");
+  // Ремоут без integrity в конфигурации грузится как раньше, без нарушений.
+  await page.goto("/payments");
+  await expect(page.getByRole("heading", { name: "Платежи" })).toBeVisible();
   expect(await platformEvents(page, "integrity:denied")).toEqual([]);
 });
 

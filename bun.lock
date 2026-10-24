@@ -81,6 +81,21 @@
         "@rsbuild/core": "^2.2.14",
       },
     },
+    "apps/mfe-probe": {
+      "name": "@mfe-app/probe",
+      "version": "0.1.0",
+      "dependencies": {
+        "@mfe/adapter-rwc": "workspace:*",
+        "@mfe/contract": "workspace:*",
+        "@rwcjs/core": "^3.3.1",
+        "@rwcjs/ui": "0.1.0",
+      },
+      "devDependencies": {
+        "@mfe/testing": "workspace:*",
+        "@module-federation/rsbuild-plugin": "^2.9.2",
+        "@rsbuild/core": "^2.2.14",
+      },
+    },
     "experiments": {
       "name": "@mfe-experiments/all",
       "devDependencies": {
@@ -198,6 +213,8 @@
     "@mfe-app/legacy-react": ["@mfe-app/legacy-react@workspace:apps/mfe-legacy-react"],
 
     "@mfe-app/payments": ["@mfe-app/payments@workspace:apps/mfe-payments"],
+
+    "@mfe-app/probe": ["@mfe-app/probe@workspace:apps/mfe-probe"],
 
     "@mfe-experiments/all": ["@mfe-experiments/all@workspace:experiments"],
 
@@ -392,6 +409,8 @@
     "ws": ["ws@8.22.0", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg=="],
 
     "@mfe-app/payments/@rwcjs/ui": ["@rwcjs/ui@0.1.0", "", { "peerDependencies": { "@rwcjs/core": "^3.2.0" } }, "sha512-qRkQ/Nebn51xf1hUwMMD604v9JDZR1OijU7nWl3oWe06ihoIgMeoizwJZpe/ugVE4bU9KZp4jhgaqhcEUNySKw=="],
+
+    "@mfe-app/probe/@rwcjs/ui": ["@rwcjs/ui@0.1.0", "", { "peerDependencies": { "@rwcjs/core": "^3.2.0" } }, "sha512-qRkQ/Nebn51xf1hUwMMD604v9JDZR1OijU7nWl3oWe06ihoIgMeoizwJZpe/ugVE4bU9KZp4jhgaqhcEUNySKw=="],
 
     "@module-federation/dts-plugin/ws": ["ws@8.21.3", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw=="],
 

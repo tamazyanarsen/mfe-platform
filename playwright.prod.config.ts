@@ -18,6 +18,7 @@ export default defineConfig({
     preview("mfe-accounts", "http://localhost:3001/mf-manifest.json"),
     preview("mfe-payments", "http://localhost:3002/mf-manifest.json"),
     preview("mfe-legacy-react", "http://localhost:3003/mf-manifest.json"),
+    preview("mfe-probe", "http://localhost:3004/mf-manifest.json"),
     preview("host", "http://localhost:3000"),
   ],
 });

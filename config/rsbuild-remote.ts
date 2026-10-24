@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { pluginModuleFederation } from "@module-federation/rsbuild-plugin";
 import { defineConfig, type RsbuildConfig } from "@rsbuild/core";
 import { pluginIntegrity } from "./integrity";
+import { sharedByLine } from "./shared";
 
 export interface RemoteConfig {
   /** Имя контейнера MF; совпадает с `manifest.name`. */
@@ -17,6 +18,11 @@ export interface RemoteConfig {
    * должен совпадать. По умолчанию включено.
    */
   readonly sharedRuntime?: boolean;
+  /**
+   * Делить киты из `kits` (и `@rwcjs/core`) с другими ремоутами той же линии
+   * совместимости: один экземпляр кита вместо конфликта двух сборок. По умолчанию включено.
+   */
+  readonly shareKits?: boolean;
   readonly extend?: RsbuildConfig;
 }
 
@@ -25,15 +31,20 @@ const installedVersion = (pkg: string): string =>
   JSON.parse(readFileSync(join(process.cwd(), "node_modules", pkg, "package.json"), "utf8"))
     .version;
 
+const isInstalled = (pkg: string) =>
+  existsSync(join(process.cwd(), "node_modules", pkg, "package.json"));
+
 /**
  * Общая сборка ремоута: экспонирует `./manifest` и `./entry` по контракту
- * (REMOTE_EXPOSES) и ничего не шарит — у ремоута своя копия рантайма.
+ * (REMOTE_EXPOSES). Делится только совместимое: киты и их фреймворк — по линиям
+ * совместимости, рантайм MF — с хостом в production. Остальное у ремоута своё.
  */
 export const defineRemoteConfig = ({
   name,
   port,
   kits = [],
   sharedRuntime = true,
+  shareKits = true,
   extend = {},
 }: RemoteConfig) =>
   defineConfig({
@@ -54,12 +65,22 @@ export const defineRemoteConfig = ({
       pluginModuleFederation({
         name,
         exposes: { "./manifest": "./src/manifest.ts", "./entry": "./src/entry.ts" },
-        // По умолчанию ничего не шарится. MFE_SHARE_CORE=1 — режим эксперимента
-        // (experiments/r4), решение и цифры — в docs/architecture.md.
+        // Киты и их фреймворк делятся по линиям совместимости (config/shared.ts): ремоуты
+        // на одной линии кита получают один его экземпляр. MFE_SHARE_CORE=1 — режим
+        // эксперимента с singleton-core (experiments/r4), цифры — в docs/architecture.md.
         shared:
           process.env.MFE_SHARE_CORE === "1"
             ? { "@rwcjs/core": { singleton: true, requiredVersion: "^3.2.0" } }
-            : {},
+            : shareKits && kits.length > 0
+              ? sharedByLine(
+                  Object.fromEntries(
+                    [...kits, ...(isInstalled("@rwcjs/core") ? ["@rwcjs/core"] : [])].map((pkg) => [
+                      pkg,
+                      installedVersion(pkg),
+                    ]),
+                  ),
+                )
+              : {},
         dts: false,
         experiments: {
           externalRuntime: sharedRuntime && process.env.NODE_ENV === "production",

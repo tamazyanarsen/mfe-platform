@@ -1,0 +1,27 @@
+{
+  "name": "@mfe-app/probe",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "@mfe/adapter-rwc": "workspace:*",
+    "@mfe/contract": "workspace:*",
+    "@rwcjs/core": "^3.3.1",
+    "@rwcjs/ui": "0.1.0"
+  },
+  "devDependencies": {
+    "@mfe/testing": "workspace:*",
+    "@module-federation/rsbuild-plugin": "^2.9.2",
+    "@rsbuild/core": "^2.2.14"
+  },
+  "mfe": {
+    "sizeBudget": {
+      "gzipKb": 50
+    }
+  }
+}

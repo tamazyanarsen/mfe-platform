@@ -18,6 +18,8 @@ export default defineConfig({
     server("mfe-accounts", "http://localhost:3001/mf-manifest.json"),
     server("mfe-payments", "http://localhost:3002/mf-manifest.json"),
     server("mfe-legacy-react", "http://localhost:3003/mf-manifest.json"),
+    // Тестовый ремоут на той же линии кита, что payments (apps/mfe-probe/README.md).
+    server("mfe-probe", "http://localhost:3004/mf-manifest.json"),
     server("host", "http://localhost:3000"),
   ],
 });
