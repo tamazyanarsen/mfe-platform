@@ -20,13 +20,20 @@ import {
   interceptLinks,
   listenStorePatches,
   type MfeOutletElement,
+  normalizeBase,
   type RouteMatch,
+  withBase,
 } from "@mfe/host-runtime";
 import { getPlatformRegistry } from "@mfe/registry";
 import { loadRemote, registerPlugins, registerRemotes } from "@module-federation/enhanced/runtime";
 import { loadPlatformConfig, type PlatformConfig } from "./remotes";
 
 // ---------------------------------------------------------------- конфигурация
+
+// Префикс пути хоста (server.base в rsbuild.config.ts). Конфигурация, манифесты и навигация
+// ремоутов работают с путями приложения ("/accounts"), префикс добавляет хост.
+const base = normalizeBase(import.meta.env.BASE_URL);
+const href = (path: string) => withBase(base, path);
 
 let config: PlatformConfig;
 try {
@@ -161,9 +168,10 @@ header.className = "shell-header";
 const brand = document.createElement("span");
 brand.textContent = "MFE platform";
 const nav = document.createElement("nav");
-for (const { href, title } of config.nav) {
+for (const { href: path, title } of config.nav) {
   const link = document.createElement("a");
-  link.href = href;
+  link.href = href(path);
+  link.dataset.path = path;
   link.textContent = title;
   nav.append(link);
 }
@@ -217,7 +225,7 @@ const show = (page: Page) => {
 
   if (page.kind === "remote") {
     // basename раньше remote: новый ремоут создаётся уже с правильным префиксом.
-    routed.basename = page.match.basename;
+    routed.basename = href(page.match.basename);
     routed.remote = page.match.remote;
   } else {
     routed.removeAttribute("remote");
@@ -227,7 +235,7 @@ const show = (page: Page) => {
   // ремоуты размонтируются.
   if (page.kind === "overview" && overview.childElementCount === 0) {
     overview.append(
-      ...config.overview.map(({ remote, basename }) => createOutlet(remote, basename)),
+      ...config.overview.map(({ remote, basename }) => createOutlet(remote, href(basename))),
     );
   } else if (page.kind !== "overview") {
     for (const outlet of overview.children) outlets.delete(outlet as MfeOutletElement);
@@ -262,7 +270,8 @@ const buildTable = () => {
     const route = next.entries.find((entry) => entry.remote === name);
     if (!route) continue;
     const link = document.createElement("a");
-    link.href = route.basename;
+    link.href = href(route.basename);
+    link.dataset.path = route.basename;
     link.textContent = `${name} (override)`;
     link.dataset.override = "";
     nav.append(link);
@@ -280,12 +289,12 @@ const retryMissingRemotes = async () => {
 
 const router = createHostRouter({
   table,
+  base,
   onRoute(match, path) {
     for (const link of nav.querySelectorAll("a")) {
+      const target = link.dataset.path ?? link.pathname;
       const active =
-        link.pathname === "/"
-          ? path === "/"
-          : path === link.pathname || path.startsWith(`${link.pathname}/`);
+        target === "/" ? path === "/" : path === target || path.startsWith(`${target}/`);
       if (active) link.setAttribute("aria-current", "page");
       else link.removeAttribute("aria-current");
     }

@@ -14,6 +14,12 @@ export default defineConfig({
       experiments: { provideExternalRuntime: true },
     }),
   ],
-  server: { port: 3000, strictPort: true, cors: { origin: /^http:\/\/localhost:\d+$/ } },
+  server: {
+    port: 3000,
+    strictPort: true,
+    cors: { origin: /^http:\/\/localhost:\d+$/ },
+    // Префикс пути, если хост развёрнут не в корне сайта: MFE_BASE=/mfe-platform/ (демо).
+    base: process.env.MFE_BASE ?? "/",
+  },
   html: { title: "MFE platform — host" },
 });

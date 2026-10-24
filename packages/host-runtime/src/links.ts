@@ -86,7 +86,8 @@ export const interceptLinks = ({
   const onIntent = (event: Event) => {
     const anchor = anchorOf(event);
     const url = anchor && internalUrl(anchor);
-    if (url) prefetch?.(url.pathname);
+    const path = url && router.appPath(url.pathname);
+    if (path) prefetch?.(path);
   };
 
   root.addEventListener("click", onClick);

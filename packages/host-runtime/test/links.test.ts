@@ -158,3 +158,29 @@ describe("interceptLinks", () => {
     expect(click(link("/payments")).defaultPrevented).toBe(false);
   });
 });
+
+describe("interceptLinks под префиксом пути", () => {
+  afterEach(() => {
+    document.body.replaceChildren();
+    history.replaceState(null, "", "/");
+  });
+
+  test("ссылка с префиксом ведёт без двойного префикса, предзагрузка — по пути приложения", () => {
+    history.replaceState(null, "", "/bank/accounts");
+    const router = createHostRouter({ table, base: "/bank", onRoute: () => {} }).start();
+    const prefetched: string[] = [];
+    const dispose = interceptLinks({ router, prefetch: (path) => prefetched.push(path) });
+
+    const anchor = document.createElement("a");
+    anchor.href = "/bank/payments";
+    document.body.append(anchor);
+    anchor.dispatchEvent(new Event("pointerover", { bubbles: true }));
+    addEventListener("click", (event) => event.preventDefault(), { once: true });
+    anchor.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+    expect(prefetched).toEqual(["/payments"]);
+    expect(location.pathname).toBe("/bank/payments");
+    dispose();
+    router.dispose();
+  });
+});

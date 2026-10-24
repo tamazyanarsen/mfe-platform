@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { CONTRACT_VERSION, navigateEvent, type RemoteManifest } from "@mfe/contract";
-import { createHostRouter, createRouteTable, type HostRouter, type RouteMatch } from "../src";
+import {
+  createHostRouter,
+  createRouteTable,
+  type HostRouter,
+  normalizeBase,
+  type RouteMatch,
+  stripBase,
+  withBase,
+} from "../src";
 
 const manifest = (name: string, routes: string[]): RemoteManifest => ({
   contractVersion: CONTRACT_VERSION,
@@ -168,5 +176,83 @@ describe("наблюдение за историей", () => {
     router.dispose();
     expect(history.pushState).toBe(original);
     history.replaceState(null, "", "/");
+  });
+});
+
+describe("префикс пути хоста", () => {
+  test.each([
+    ["", ""],
+    ["/", ""],
+    ["/mfe-platform/", "/mfe-platform"],
+    ["business", "/business"],
+  ])("normalizeBase(%p) → %p", (raw, base) => {
+    expect(normalizeBase(raw)).toBe(base);
+  });
+
+  test("withBase добавляет префикс только к путям приложения", () => {
+    expect(withBase("/b", "/accounts")).toBe("/b/accounts");
+    expect(withBase("/b", "/")).toBe("/b/");
+    expect(withBase("/b", "/b/accounts")).toBe("/b/accounts");
+    expect(withBase("/b", "//cdn.example/x")).toBe("//cdn.example/x");
+    expect(withBase("/b", "https://example.com/")).toBe("https://example.com/");
+    expect(withBase("", "/accounts")).toBe("/accounts");
+  });
+
+  test("stripBase снимает префикс, адрес вне префикса — null", () => {
+    expect(stripBase("/b", "/b")).toBe("/");
+    expect(stripBase("/b", "/b/")).toBe("/");
+    expect(stripBase("/b", "/b/accounts/1")).toBe("/accounts/1");
+    expect(stripBase("/b", "/bx/accounts")).toBeNull();
+    expect(stripBase("/b", "/accounts")).toBeNull();
+    expect(stripBase("", "/accounts")).toBe("/accounts");
+  });
+
+  describe("роутер под префиксом", () => {
+    let router: HostRouter | null = null;
+    const seen: Array<[string | null, string]> = [];
+    const start = () => {
+      router = createHostRouter({
+        table,
+        base: "/bank/",
+        onRoute: (match, path) => seen.push([match?.remote ?? null, path]),
+      }).start();
+      return router;
+    };
+
+    afterEach(() => {
+      router?.dispose();
+      router = null;
+      seen.length = 0;
+      history.replaceState(null, "", "/");
+    });
+
+    test("маршрут ищется по пути без префикса, навигация добавляет префикс", () => {
+      history.replaceState(null, "", "/bank/accounts/1");
+      const r = start();
+      r.navigate("/payments/new");
+      expect(location.pathname).toBe("/bank/payments/new");
+      expect(seen).toEqual([
+        ["accounts", "/accounts/1"],
+        ["payments", "/payments/new"],
+      ]);
+      expect(r.base).toBe("/bank");
+      expect(r.href("/accounts")).toBe("/bank/accounts");
+      expect(r.appPath("/bank/accounts")).toBe("/accounts");
+    });
+
+    test("platform:navigate ремоута — путь приложения, префикс добавляет хост", () => {
+      start();
+      document.dispatchEvent(navigateEvent("/payments"));
+      expect(location.pathname).toBe("/bank/payments");
+      expect(seen.at(-1)).toEqual(["payments", "/payments"]);
+    });
+
+    test('корень хоста — путь приложения "/", адрес вне префикса не находит ремоут', () => {
+      history.replaceState(null, "", "/bank/");
+      start();
+      expect(seen.at(-1)).toEqual(["home", "/"]);
+      history.pushState(null, "", "/accounts");
+      expect(seen.at(-1)).toEqual([null, "/accounts"]);
+    });
   });
 });

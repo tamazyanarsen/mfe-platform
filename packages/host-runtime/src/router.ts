@@ -73,8 +73,33 @@ export const createRouteTable = (manifests: readonly RemoteManifest[]): RouteTab
   };
 };
 
+/**
+ * Префикс пути, под которым развёрнут хост: "/business" для `bank.ru/business/`. Пустая
+ * строка — корень сайта. Маршруты манифестов и навигация ремоутов его не знают: роутер
+ * снимает префикс с адреса браузера и добавляет его при переходе.
+ */
+export const normalizeBase = (base = ""): string => {
+  const trimmed = base.replace(/\/+$/, "");
+  return trimmed === "" ? "" : trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+};
+
+const underBase = (base: string, pathname: string) =>
+  pathname === base || pathname.startsWith(`${base}/`);
+
+/** Путь приложения → путь в адресе браузера. Пути с префиксом и относительные не меняются. */
+export const withBase = (base: string, path: string): string =>
+  base === "" || !path.startsWith("/") || path.startsWith("//") || underBase(base, path)
+    ? path
+    : `${base}${path}`;
+
+/** Путь в адресе браузера → путь приложения; null — адрес вне префикса хоста. */
+export const stripBase = (base: string, pathname: string): string | null =>
+  base === "" ? pathname : underBase(base, pathname) ? pathname.slice(base.length) || "/" : null;
+
 export interface HostRouterOptions {
   readonly table: RouteTable;
+  /** Префикс пути хоста (см. normalizeBase). По умолчанию — корень сайта. */
+  readonly base?: string;
   /** Вызывается при старте и после каждой смены адреса; `match` — null для чужого пути. */
   readonly onRoute: (match: RouteMatch | null, path: string) => void;
   /** Где слушать `platform:navigate`. По умолчанию — document. */
@@ -94,6 +119,12 @@ export interface HostRouter {
    */
   replaceTable(table: RouteTable): void;
   readonly current: RouteMatch | null;
+  /** Префикс пути хоста без завершающего "/"; "" — корень сайта. */
+  readonly base: string;
+  /** Путь приложения → путь в адресе браузера (с префиксом хоста). */
+  href(path: string): string;
+  /** Путь в адресе браузера → путь приложения; null — вне префикса хоста. */
+  appPath(pathname: string): string | null;
   dispose(): void;
 }
 
@@ -101,21 +132,23 @@ export const createHostRouter = ({
   table: initialTable,
   onRoute,
   eventTarget = document,
+  base: rawBase,
 }: HostRouterOptions): HostRouter => {
   let table = initialTable;
   let current: RouteMatch | null = null;
+  const base = normalizeBase(rawBase);
 
   const sync = () => {
-    const path = location.pathname;
-    current = table.resolve(path);
-    onRoute(current, path);
+    const path = stripBase(base, location.pathname);
+    current = path === null ? null : table.resolve(path);
+    onRoute(current, path ?? location.pathname);
   };
 
   /** Пока хост пишет историю сам, перехваченные pushState/replaceState не синхронизируют. */
   let writing = false;
 
   const navigate = (to: string, { replace = false } = {}) => {
-    const url = new URL(to, location.href);
+    const url = new URL(withBase(base, to), location.href);
     if (url.origin !== location.origin) {
       // Наружу — только http(s): `javascript:` и `data:` из события ремоута исполнились бы
       // в контексте хоста.
@@ -191,6 +224,9 @@ export const createHostRouter = ({
     get current() {
       return current;
     },
+    base,
+    href: (path) => withBase(base, path),
+    appPath: (pathname) => stripBase(base, pathname),
     dispose() {
       started = false;
       unobserve();

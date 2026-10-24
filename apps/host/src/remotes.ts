@@ -20,7 +20,8 @@ export interface PlatformConfig {
   readonly storeAccess?: StoreAccess;
 }
 
-export const CONFIG_URL = "/platform.config.json";
+/** Рядом с хостом: под префиксом пути, если хост развёрнут не в корне (server.base). */
+export const CONFIG_URL = `${import.meta.env.BASE_URL ?? "/"}platform.config.json`;
 
 const isList = (value: unknown, keys: readonly string[]) =>
   Array.isArray(value) &&

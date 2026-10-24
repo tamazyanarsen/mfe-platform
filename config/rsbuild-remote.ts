@@ -23,6 +23,12 @@ export interface RemoteConfig {
    * совместимости: один экземпляр кита вместо конфликта двух сборок. По умолчанию включено.
    */
   readonly shareKits?: boolean;
+  /**
+   * Откуда грузятся файлы production-сборки. По умолчанию "auto": рантайм MF берёт адрес
+   * каталога манифеста, поэтому одна сборка работает на любом CDN и под любым путём.
+   * Переменная окружения MFE_PUBLIC_PATH переопределяет значение.
+   */
+  readonly publicPath?: string;
   readonly extend?: RsbuildConfig;
 }
 
@@ -45,6 +51,7 @@ export const defineRemoteConfig = ({
   kits = [],
   sharedRuntime = true,
   shareKits = true,
+  publicPath = "auto",
   extend = {},
 }: RemoteConfig) =>
   defineConfig({
@@ -101,7 +108,7 @@ export const defineRemoteConfig = ({
     // Код ремоута забирает хост с другого origin; доверяем только локальным хостам стенда.
     server: { port, strictPort: true, cors: { origin: /^http:\/\/localhost:\d+$/ } },
     dev: { assetPrefix: `http://localhost:${port}/` },
-    output: { assetPrefix: `http://localhost:${port}/` },
+    output: { assetPrefix: process.env.MFE_PUBLIC_PATH ?? publicPath },
     html: { title: `${name} (standalone)` },
     // SRI для чанков в production-сборке: remoteEntry проверяет хеш каждого чанка, который
     // грузит. Сам remoteEntry закрывает pluginIntegrity (config/integrity.ts).
