@@ -138,7 +138,10 @@ conflict, and the remote's `register()` fails with a clear message.
 `idle` → `loading` → `ready` | `error` | `denied`. The state is reflected in the `state` attribute
 and the `mfe-outlet-state` event. Load errors and render exceptions stay inside the
 outlet: a fallback is shown, and a `mount:error` event goes to the transport with the fields `name`,
-`version`, `mountId`, `route`, `contractVersion`, `extra`, `details.phase`.
+`version`, `mountId`, `route`, `contractVersion`, `extra`, `details.phase`. `route` is the
+application path the host put into the outlet's `route` property: the base prefix is already
+stripped (in the demo, `/accounts`, not `/mfe-platform/accounts`). If the property is not set,
+there is no `route` field.
 
 After an error `outlet.retry()` loads the remote again; the fallback receives the same call as
 `retry` in `FallbackContext` — the host renders the «Повторить» (Retry) button from it.

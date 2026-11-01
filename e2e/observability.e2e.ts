@@ -71,6 +71,9 @@ test("метрики монтирования: время загрузки ко�
   await expect
     .poll(async () => (await events(page)).find((e) => e.type === "mount:ready")?.timings)
     .toMatchObject({ codeLoad: expect.any(Number), firstFrame: expect.any(Number) });
+  // Маршрут события — путь приложения, который хост записал в outlet, а не адрес страницы.
+  const ready = (await events(page)).find((e) => e.type === "mount:ready");
+  expect(ready).toMatchObject({ name: "accounts", route: "/accounts" });
   const kinds = (await events(page)).map((e) => e.type);
   expect(kinds).toEqual(
     expect.arrayContaining(["mount:start", "mount:code-loaded", "mount:ready", "register:ok"]),

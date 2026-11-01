@@ -73,10 +73,15 @@ const memoryLoader = (...remotes: ReturnType<typeof fakeRemote>[]) => {
   return { loader, calls };
 };
 
-const mount = async (options: OutletOptions, remote: string, props?: Record<string, unknown>) => {
+const mount = async (
+  options: OutletOptions,
+  remote: string,
+  { props, route }: { props?: Record<string, unknown>; route?: string } = {},
+) => {
   const tag = defineMfeOutlet(options, uniqueTag("test-outlet"));
   const outlet = document.createElement(tag) as MfeOutletElement;
   if (props) outlet.props = props;
+  if (route !== undefined) outlet.route = route;
   outlet.remote = remote;
   document.body.append(outlet);
   const state = await whenOutletSettles(outlet);
@@ -104,9 +109,7 @@ describe("<mfe-outlet>", () => {
     const { outlet, state } = await mount(
       { loader, transport: createMemoryTransport() },
       "accounts",
-      {
-        greeting: "world",
-      },
+      { props: { greeting: "world" } },
     );
 
     expect(state).toBe("ready");
@@ -130,7 +133,7 @@ describe("<mfe-outlet>", () => {
     const remote = fakeRemote("profile");
     const { loader } = memoryLoader(remote);
     const { outlet } = await mount({ loader, transport: createMemoryTransport() }, "profile", {
-      greeting: "a",
+      props: { greeting: "a" },
     });
     outlet.props = { greeting: "b" };
     expect((outlet.remoteElement as HTMLElement & { greeting: string }).greeting).toBe("b");
@@ -311,7 +314,6 @@ describe("изоляция ошибок и наблюдаемость", () => {
   };
 
   test("исключение при отрисовке: fallback, соседний ремоут работает, событие со всеми полями", async () => {
-    history.replaceState(null, "", "/cards/7");
     const broken = crashingRemote("cards");
     const healthy = fakeRemote("accounts");
     const { loader } = memoryLoader(broken, healthy);
@@ -319,7 +321,7 @@ describe("изоляция ошибок и наблюдаемость", () => {
     const options = { loader, transport };
 
     const [crashed, neighbour] = await Promise.all([
-      mount(options, "cards"),
+      mount(options, "cards", { route: "/cards/7" }),
       mount(options, "accounts"),
     ]);
 
@@ -341,7 +343,6 @@ describe("изоляция ошибок и наблюдаемость", () => {
       error: { message: "cards exploded while rendering" },
       details: { phase: "render" },
     });
-    history.replaceState(null, "", "/");
   });
 
   test("mount:ready несёт время загрузки кода и время до первого кадра", async () => {
@@ -351,6 +352,26 @@ describe("изоляция ошибок и наблюдаемость", () => {
     const ready = await eventOf(transport, "mount:ready");
     expect(ready.timings?.codeLoad).toBeNumber();
     expect(ready.timings?.firstFrame).toBeGreaterThanOrEqual(ready.timings?.codeLoad ?? 0);
+  });
+
+  test("события несут маршрут из свойства outlet, а не из адреса страницы", async () => {
+    history.replaceState(null, "", "/payments/42");
+    const { loader } = memoryLoader(fakeRemote("routed"));
+    const transport = createMemoryTransport();
+    await mount({ loader, transport }, "routed", { route: "/accounts" });
+
+    const start = await eventOf(transport, "mount:start");
+    expect(start.route).toBe("/accounts");
+    history.replaceState(null, "", "/");
+  });
+
+  test("маршрут не задан — поля route в событии нет", async () => {
+    const { loader } = memoryLoader(fakeRemote("unrouted"));
+    const transport = createMemoryTransport();
+    await mount({ loader, transport }, "unrouted");
+
+    const start = await eventOf(transport, "mount:start");
+    expect(start).not.toHaveProperty("route");
   });
 
   test("подменённый транспорт получает те же события — внешний приёмник подключается без форка", async () => {

@@ -60,6 +60,12 @@ describe("mountRemote", () => {
     expect(mounted.outlet.isConnected).toBe(false);
   });
 
+  test("маршрут из опций попадает в события монтирования", async () => {
+    const mounted = await mountRemote(sampleRemote(), { route: "/cards/7" });
+    const start = mounted.events.events().find((event) => event.type === "mount:start");
+    expect(start?.route).toBe("/cards/7");
+  });
+
   test("ошибка отрисовки — состояние error, а не исключение в тесте", async () => {
     const mounted = await mountRemote(sampleRemote("render"));
     expect(mounted.state).toBe("error");

@@ -44,6 +44,11 @@ export interface OutletStateDetail {
 export type MfeOutletElement = HTMLElement & {
   remote: string;
   basename: string;
+  /**
+   * Путь приложения, с которым хост связывает события монтирования. Ставит хост: адрес
+   * страницы для этого не годится — в нём есть префикс базы, а в демо он другой.
+   */
+  route: string;
   /** Вход ремоута: ключи пишутся свойствами на его элемент. */
   props: Readonly<Record<string, unknown>>;
   readonly state: OutletState;
@@ -87,6 +92,9 @@ const nextMountId = (remote: string) =>
  * `remote`, проверяет манифест и политики, вызывает `register()` и монтирует элемент
  * `manifest.tag`. Падение загрузки остаётся внутри outlet: показывается fallback.
  *
+ * Маршрут для событий наблюдаемости берётся из свойства `route`, а не из `location`:
+ * хост передаёт путь приложения без префикса базы. Не задан — поля `route` в событии нет.
+ *
  * Shadow DOM у outlet нет: ремоут живёт в light DOM, события из него всплывают как есть.
  */
 export const defineMfeOutlet = (options: OutletOptions, tag = "mfe-outlet"): string => {
@@ -102,6 +110,7 @@ export const defineMfeOutlet = (options: OutletOptions, tag = "mfe-outlet"): str
     static observedAttributes = ["remote", "basename"];
 
     #state: OutletState = "idle";
+    #route = "";
     #props: Readonly<Record<string, unknown>> = {};
     #remoteElement: HTMLElement | null = null;
     #mountId: string | undefined;
@@ -124,6 +133,14 @@ export const defineMfeOutlet = (options: OutletOptions, tag = "mfe-outlet"): str
 
     set basename(value: string) {
       this.setAttribute("basename", value);
+    }
+
+    get route(): string {
+      return this.#route;
+    }
+
+    set route(value: string) {
+      this.#route = value;
     }
 
     get props(): Readonly<Record<string, unknown>> {
@@ -193,13 +210,15 @@ export const defineMfeOutlet = (options: OutletOptions, tag = "mfe-outlet"): str
       this.replaceChildren(renderFallback({ state: "loading", remote }));
       this.#setState("loading", remote);
 
-      const route = location.pathname;
+      // Маршрут снимается на старте монтирования: события принадлежат тому пути, с которого
+      // хост начал показывать ремоут.
+      const route = this.#route;
       const emit = (event: Omit<PlatformEvent, "time" | "name" | "mountId" | "route">) =>
         transport.send({
           time: Date.now(),
           name: remote,
           mountId,
-          route,
+          ...(route ? { route } : {}),
           ...(manifest
             ? {
                 contractVersion: manifest.contractVersion,

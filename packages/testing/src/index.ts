@@ -61,6 +61,8 @@ export interface MountRemoteOptions {
   /** Входные свойства, как их передаёт хост: `{ platform: {...} }`. */
   readonly props?: Readonly<Record<string, unknown>>;
   readonly basename?: string;
+  /** Путь приложения для событий монтирования — как его передаёт хост свойством `route`. */
+  readonly route?: string;
   /** Куда вставить outlet. По умолчанию — document.body. */
   readonly container?: Element;
   /** Политики, версии контракта, fallback — как у хоста. */
@@ -81,7 +83,13 @@ export interface MountedRemote {
 /** Монтирует ремоут через настоящий `<mfe-outlet>` и ждёт ready, error или denied. */
 export const mountRemote = async (
   module: RemoteModule,
-  { props, basename, container = document.body, outlet: outletOptions }: MountRemoteOptions = {},
+  {
+    props,
+    basename,
+    route,
+    container = document.body,
+    outlet: outletOptions,
+  }: MountRemoteOptions = {},
 ): Promise<MountedRemote> => {
   const events = createMemoryTransport();
   const tag = defineMfeOutlet(
@@ -91,6 +99,7 @@ export const mountRemote = async (
   const outlet = document.createElement(tag) as MfeOutletElement;
   if (props) outlet.props = props;
   if (basename !== undefined) outlet.basename = basename;
+  if (route !== undefined) outlet.route = route;
   outlet.remote = module.manifest.name;
   container.append(outlet);
   const state = await whenOutletSettles(outlet);

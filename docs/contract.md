@@ -138,7 +138,9 @@ useKit({ name: "@rwcjs/ui", version: "0.2.0", consumer: manifest.name, kit: ui, 
 `idle` → `loading` → `ready` | `error` | `denied`. Состояние отражается атрибутом `state`
 и событием `mfe-outlet-state`. Ошибки загрузки и исключения при отрисовке остаются внутри
 outlet: показывается fallback, событие `mount:error` уходит в транспорт с полями `name`,
-`version`, `mountId`, `route`, `contractVersion`, `extra`, `details.phase`.
+`version`, `mountId`, `route`, `contractVersion`, `extra`, `details.phase`. `route` — путь
+приложения, который хост записал в свойство `route` outlet: префикс базы в нём уже снят
+(в демо — `/accounts`, а не `/mfe-platform/accounts`). Свойство не задано — поля `route` нет.
 
 После ошибки `outlet.retry()` загружает ремоут заново; тот же вызов получает fallback как
 `retry` в `FallbackContext` — хост рисует по нему кнопку «Повторить».

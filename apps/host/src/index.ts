@@ -152,9 +152,10 @@ const registry = getPlatformRegistry();
 registry.setTransport(transport);
 Object.assign(window, { mfe: { events: events.events, registry, store, bus, devtools } });
 
-const createOutlet = (remote?: string, basename?: string) => {
+const createOutlet = (remote?: string, basename?: string, route = "") => {
   const outlet = document.createElement(outletTag) as MfeOutletElement;
   outlet.props = platformProps();
+  if (route) outlet.route = route;
   if (basename) outlet.basename = basename;
   if (remote) outlet.remote = remote;
   outlets.add(outlet);
@@ -218,10 +219,13 @@ if (devtools && devtoolsRequested) devtools.open();
 
 type Page = { kind: "overview" } | { kind: "remote"; match: RouteMatch } | { kind: "not-found" };
 
-const show = (page: Page) => {
+const show = (page: Page, path: string) => {
   routed.hidden = page.kind !== "remote";
   overview.hidden = page.kind !== "overview";
   notFound.hidden = page.kind !== "not-found";
+
+  // Путь приложения без префикса базы: его получают события монтирования ремоутов.
+  routed.route = path;
 
   if (page.kind === "remote") {
     // basename раньше remote: новый ремоут создаётся уже с правильным префиксом.
@@ -235,7 +239,7 @@ const show = (page: Page) => {
   // ремоуты размонтируются.
   if (page.kind === "overview" && overview.childElementCount === 0) {
     overview.append(
-      ...config.overview.map(({ remote, basename }) => createOutlet(remote, href(basename))),
+      ...config.overview.map(({ remote, basename }) => createOutlet(remote, href(basename), path)),
     );
   } else if (page.kind !== "overview") {
     for (const outlet of overview.children) outlets.delete(outlet as MfeOutletElement);
@@ -304,6 +308,7 @@ const router = createHostRouter({
         : match
           ? { kind: "remote", match }
           : { kind: "not-found" },
+      path,
     );
     if (!match && path !== "/") void retryMissingRemotes();
   },
